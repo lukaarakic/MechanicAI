@@ -1,0 +1,164 @@
+import { redirect } from '@remix-run/node'
+import { type Password, type User } from '@prisma/client'
+import bcrypt from 'bcryptjs'
+import { prisma } from '~/utils/db.server'
+import { sessionStorage } from './session.server'
+
+export const userIdKey = 'userId'
+
+export async function getUserId(request: Request) {
+  const cookieSession = await sessionStorage.getSession(
+    request.headers.get('cookie')
+  )
+
+  const userId = cookieSession.get(userIdKey)
+  if (!userId) return null
+
+  const user = await prisma.user.findUnique({
+    select: { id: true },
+    where: { id: userId },
+  })
+
+  if (!user) return logout(request)
+
+  return user.id
+}
+
+export async function requireAnonymous(request: Request) {
+  const userId = await getUserId(request)
+
+  if (userId) {
+    throw redirect('/')
+  }
+}
+
+export async function requireUserId(
+  request: Request,
+  { redirectTo }: { redirectTo?: string | null } = {}
+) {
+  const userId = await getUserId(request)
+
+  if (!userId) {
+    const requestUrl = new URL(request.url)
+
+    redirectTo =
+      redirectTo === null
+        ? null
+        : redirectTo ?? `${requestUrl.pathname}${requestUrl.searchParams}`
+
+    const loginParams = redirectTo ? new URLSearchParams({ redirectTo }) : null
+    const loginRedirect = ['/login', loginParams?.toString()]
+      .filter(Boolean)
+      .join('?')
+
+    throw redirect(loginRedirect)
+  }
+
+  return userId
+}
+
+export async function requireUser(request: Request) {
+  const userId = await requireUserId(request)
+
+  const user = await prisma.user.findUnique({
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      avatar: true,
+      tokens: true,
+      email: true,
+      car: {
+        select: {
+          id: true,
+        },
+      },
+    },
+    where: { id: userId },
+  })
+
+  if (!user) throw await logout(request)
+
+  return user
+}
+
+export async function login({
+  email,
+  password,
+}: {
+  email: User['email']
+  password: string
+}) {
+  return verifyUserPassword({ email }, password)
+}
+
+export async function signup({
+  firstName,
+  lastName,
+  email,
+  password,
+}: {
+  email: User['email']
+  firstName: User['firstName']
+  lastName: User['lastName']
+  password: string
+}) {
+  const hashedPassword = await getPasswordHash(password)
+
+  const user = await prisma.user.create({
+    data: {
+      email: email.toLowerCase(),
+      firstName,
+      lastName,
+      tokens: 10,
+      avatar: `https://api.dicebear.com/9.x/thumbs/svg?seed=${firstName}`,
+      password: {
+        create: {
+          hash: hashedPassword,
+        },
+      },
+    },
+  })
+
+  return user
+}
+
+export async function logout(request: Request) {
+  const cookieSession = await sessionStorage.getSession(
+    request.headers.get('cookie')
+  )
+  cookieSession.unset(userIdKey)
+
+  throw redirect('/login', {
+    headers: {
+      'set-cookie': await sessionStorage.destroySession(cookieSession),
+    },
+  })
+}
+
+export async function getPasswordHash(password: string) {
+  const hash = await bcrypt.hash(password, 10)
+  return hash
+}
+
+export async function verifyUserPassword(
+  where: Pick<User, 'email'> | Pick<User, 'id'>,
+  password: Password['hash']
+) {
+  const userWithPassword = await prisma.user.findUnique({
+    where,
+    select: { id: true, password: { select: { hash: true } } },
+  })
+
+  if (!userWithPassword || !userWithPassword.password) {
+    return null
+  }
+
+  const isValid = await bcrypt.compare(password, userWithPassword.password.hash)
+
+  if (!isValid) {
+    return null
+  }
+
+  return { id: userWithPassword.id }
+}
