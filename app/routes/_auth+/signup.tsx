@@ -7,16 +7,13 @@ import { Form, json, Link, useActionData } from '@remix-run/react'
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { z } from 'zod'
-import bcrypt from 'bcryptjs'
 
 // Utils
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 import { checkHoneypot } from '~/utils/honeypot.server'
 import { checkCSRF } from '~/utils/csrf.server'
-import { prisma } from '~/utils/db.server'
-import { sessionStorage } from '~/utils/session.server'
-import { EmailSchema, PasswordSchema } from '~/utils/user-validation'
+import { EmailSchema } from '~/utils/user-validation'
 
 // Components
 import { Button } from '~/components/ui/button'
@@ -24,12 +21,12 @@ import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import ErrorList from '~/components/ui/ErrorList'
 import { requireAnonymous } from '~/utils/auth.server'
+import { prisma } from '~/utils/db.server'
+import { verifySessionStorage } from '~/utils/verification.server'
+import { onboardingEmailSessionKey } from './onboarding'
 
 const SignupSchema = z.object({
-  firstName: z.string().min(3).max(50),
-  lastName: z.string().min(3).max(50),
   email: EmailSchema,
-  password: PasswordSchema,
 })
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -46,44 +43,30 @@ export async function action({ request }: ActionFunctionArgs) {
   checkHoneypot(formData)
 
   const submission = await parseWithZod(formData, {
-    schema: SignupSchema.superRefine(async (data, ctx) => {
-      const existingUser = await prisma.user.findUnique({
-        where: {
-          email: data.email,
-        },
-        select: { id: true },
-      })
+    schema: (intent) =>
+      SignupSchema.transform(async (data, ctx) => {
+        if (intent !== null) return { ...data }
 
-      if (existingUser) {
-        ctx.addIssue({
-          path: ['email'],
-          code: z.ZodIssueCode.custom,
-          message: 'A user alreay exists with this email',
+        const existingEmail = await prisma.user.findUnique({
+          where: {
+            email: data.email,
+          },
+          select: {
+            email: true,
+          },
         })
 
-        return
-      }
-    }).transform(async (data) => {
-      const { email, firstName, lastName, password } = data
+        if (existingEmail) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Email is already in use',
+          })
 
-      const user = await prisma.user.create({
-        select: { id: true },
-        data: {
-          email: email.toLowerCase(),
-          firstName,
-          lastName,
-          password: {
-            create: {
-              hash: await bcrypt.hash(password, 10),
-            },
-          },
-          avatar: `https://api.dicebear.com/9.x/thumbs/svg?seed=${firstName}`,
-          tokens: 10,
-        },
-      })
+          return z.NEVER
+        }
 
-      return { ...data, user }
-    }),
+        return { ...data }
+      }),
     async: true,
   })
 
@@ -92,22 +75,20 @@ export async function action({ request }: ActionFunctionArgs) {
       {
         result: submission.reply(),
       },
-      {
-        status: submission.status === 'error' ? 400 : 200,
-      }
+      { status: submission.status === 'error' ? 400 : 200 }
     )
   }
 
-  const { user } = submission.value
+  const { email } = submission.value
 
-  const cookieSession = await sessionStorage.getSession(
+  const verifySession = await verifySessionStorage.getSession(
     request.headers.get('cookie')
   )
-  cookieSession.set('userId', user.id)
+  verifySession.set(onboardingEmailSessionKey, email)
 
-  return redirect('/', {
+  return redirect('/onboarding', {
     headers: {
-      'set-cookie': await sessionStorage.commitSession(cookieSession),
+      'set-cookie': await verifySessionStorage.commitSession(verifySession),
     },
   })
 }
@@ -146,34 +127,6 @@ const Signup = () => {
         <AuthenticityTokenInput />
         <HoneypotInputs />
 
-        <div className="flex w-full justify-between gap-4">
-          <div className="w-full">
-            <Label>First Name</Label>
-            <Input
-              placeholder="John"
-              {...getInputProps(fields.firstName, {
-                type: 'text',
-              })}
-            />
-            <ErrorList
-              id={fields.firstName.id}
-              errors={fields.firstName.errors}
-            />
-          </div>
-          <div className="w-full">
-            <Label htmlFor="last-name">Last Name</Label>
-            <Input
-              placeholder="Smith"
-              {...getInputProps(fields.lastName, {
-                type: 'text',
-              })}
-            />
-            <ErrorList
-              id={fields.lastName.id}
-              errors={fields.lastName.errors}
-            />
-          </div>
-        </div>
         <div>
           <Label htmlFor="email">Email</Label>
           <Input
@@ -183,17 +136,6 @@ const Signup = () => {
             })}
           />
           <ErrorList id={fields.email.id} errors={fields.email.errors} />
-        </div>
-
-        <div>
-          <Label htmlFor="password">Password</Label>
-          <Input
-            placeholder="********"
-            {...getInputProps(fields.password, {
-              type: 'password',
-            })}
-          />
-          <ErrorList id={fields.password.id} errors={fields.password.errors} />
         </div>
 
         <ErrorList id={form.errorId} errors={form.errors} />

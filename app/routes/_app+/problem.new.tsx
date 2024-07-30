@@ -1,6 +1,6 @@
 import { getFormProps, getTextareaProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { ActionFunctionArgs, json } from '@remix-run/node'
+import { ActionFunctionArgs, json, redirect } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 import { z } from 'zod'
@@ -8,7 +8,7 @@ import { Button } from '~/components/ui/button'
 import ErrorList from '~/components/ui/ErrorList'
 import { Label } from '~/components/ui/label'
 import { Textarea } from '~/components/ui/textarea'
-import { requireUserId } from '~/utils/auth.server'
+import { requireUser } from '~/utils/auth.server'
 import { checkCSRF } from '~/utils/csrf.server'
 import OpenAI from 'openai'
 import { prisma } from '~/utils/db.server'
@@ -21,12 +21,29 @@ const ProblemSchema = z.object({
 })
 
 export async function action({ request }: ActionFunctionArgs) {
-  const userId = await requireUserId(request)
+  const user = await requireUser(request)
 
   const formData = await request.formData()
   await checkCSRF(formData, request)
 
-  const submission = await parseWithZod(formData, { schema: ProblemSchema })
+  const submission = await parseWithZod(formData, {
+    schema: (intent) =>
+      ProblemSchema.transform(async (data, ctx) => {
+        if (intent !== null) return { ...data }
+
+        if (user.tokens < 10) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'You dont have enough tokens.',
+          })
+
+          return z.NEVER
+        }
+
+        return { ...data }
+      }),
+    async: true,
+  })
 
   if (submission.status !== 'success') {
     return json(
@@ -39,7 +56,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const car = await prisma.car.findUnique({
     where: {
-      userId,
+      userId: user.id,
     },
     select: {
       carBrand: true,
@@ -66,7 +83,49 @@ export async function action({ request }: ActionFunctionArgs) {
           Need somebody with expertise on automobiles regarding troubleshooting solutions like;
           diagnosing problems/errors present both visually & within engine parts in order to figure out what's causing them (like lack of oil or power issues)
           & suggest required replacements while recording down details such fuel consumption type etc. I'll answer to 3 questions so you can analyze problem.
-          You only can only answer to a mechanical questions. Answer in .md format only.
+          You only can only answer to a mechanical questions. Answer in .md format only. In start answer dont use \`\`\`md or \`\`\`markdown, and similar.
+
+          Here is an example answer: 
+
+          # Troubleshooting Guide for Ford Ranchero - Front Right Wheel Noise
+
+          ## Issue Summary
+          You are experiencing a knocking or clunking noise from the front right wheel while driving, particularly when driving over bumps or imperfections in the road.
+
+          ## Potential Causes
+
+          1. **Worn Suspension Components**
+            - **Ball Joints**: Check for wear or damage in the ball joints. A failed ball joint can cause a knocking noise when the vehicle goes over bumps.
+            - **Control Arms**: Inspect the control arms and bushings. Worn bushings can lead to movement and noise.
+            - **Struts/Shocks**: Old or damaged struts/shocks may not dampen bumps properly, causing noise and poor handling.
+
+          2. **Loose or Damaged Hardware**
+            - **Brake Components**: Loose calipers or missing hardware can produce noise. Ensure all components are properly secured.
+            - **Wheel Hub Assembly**: Check if the wheel hub assembly is loose or damaged. A failing hub can create knocking sounds.
+
+          3. **Tire Issues**
+            - **Tire Condition**: Inspect the tread and sidewalls of the tire for bulges, uneven wear, or damage. Certain tire issues can cause noise when encountering road irregularities.
+            - **Mounting**: Ensure that the tire is properly mounted and the lug nuts are adequately tightened.
+
+          ## Recommended Actions
+
+          1. **Visual Inspection**
+            - Start by performing a visual inspection of the front suspension components. Look for any obvious signs of wear, damage, or looseness.
+
+          2. **Test Drive**
+            - If possible, do a controlled test drive to identify specific conditions under which the noise occurs (speed, turning, etc.).
+
+          3. **Detailed Component Check**
+            - If you can access tools, consider checking the ball joints, control arms, and struts for movement or damage by manually applying pressure or using a pry bar.
+
+          4. **Consult a Professional**
+            - If you are unable to identify the noise sources or are not comfortable inspecting these components, consult a qualified mechanic for a comprehensive inspection.
+
+          ## Recording Details
+          - **Fuel Consumption**: Note any changes in fuel consumption patterns, as suspension issues can sometimes impact fuel efficiency if aligned components are not functioning correctly.
+          - **Other Symptoms**: Document any additional symptoms such as handling issues, vibrations, or change in ride quality to help with diagnosis.
+
+          Make sure to address the issue promptly to avoid potential safety risks or further damage to the vehicle.
           `,
       },
       {
@@ -93,6 +152,8 @@ export async function action({ request }: ActionFunctionArgs) {
     model: 'gpt-4o-mini',
   })
 
+  console.log(submission.value)
+
   const message = completion.choices[0].message.content
 
   invariantResponse(message, 'Something went wrong. Try later.', {
@@ -101,24 +162,33 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const titleMatch = message.match(/^#\s+(.*)/)
 
-  await prisma.solution.create({
+  const solution = await prisma.solution.create({
     data: {
       solutionTitle: titleMatch ? titleMatch[1] : 'No title found',
       solution: message,
       user: {
         connect: {
-          id: userId,
+          id: user.id,
         },
+      },
+    },
+    select: {
+      id: true,
+    },
+  })
+
+  await prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      tokens: {
+        decrement: 10,
       },
     },
   })
 
-  return json(
-    {
-      result: submission.reply(),
-    },
-    { status: 200 }
-  )
+  return redirect(`/solution/${solution.id}`)
 }
 
 const NewProblem = () => {

@@ -38,7 +38,9 @@ const Layout = () => {
 
       <div className="w-full px-8 pt-4">
         <div className="flex items-center justify-between w-full">
-          <img src={Logo} alt="" className="w-44 h-full" />
+          <Link to="/">
+            <img src={Logo} alt="" className="w-44 h-full" />
+          </Link>
 
           <Popover>
             <PopoverTrigger>
