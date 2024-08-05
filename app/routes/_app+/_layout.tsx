@@ -1,5 +1,5 @@
 import SolutionsSidebar from '~/components/SolutionsSidebar'
-import Logo from 'app/assets/logo.svg'
+import Logo from 'app/assets/Logo.svg'
 import { Form, Link, Outlet, useLoaderData } from '@remix-run/react'
 import {
   Popover,
@@ -39,7 +39,7 @@ const Layout = () => {
       <div className="w-full px-8 pt-4">
         <div className="flex items-center justify-between w-full">
           <Link to="/">
-            <img src={Logo} alt="" className="w-44 h-full" />
+            <img src={Logo} alt="" className="w-16 h-full" />
           </Link>
 
           <Popover>

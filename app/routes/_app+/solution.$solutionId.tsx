@@ -4,6 +4,7 @@ import { GeneralErrorBoundary } from '~/components/error-boundary'
 import { prisma } from '~/utils/db.server'
 import { invariantResponse } from '~/utils/misc'
 import Markdown from 'react-markdown'
+import Logo from '~/assets/Logo.svg'
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { solutionId } = params
@@ -29,7 +30,9 @@ const Solution = () => {
 
   return (
     <div className="max-w-[860px] mx-auto flex mt-11 gap-10">
-      <div className="w-12 h-12 rounded-full bg-slate-600 flex-shrink-0"></div>
+      <div className="w-14 h-14 rounded-full bg-slate-600 flex-shrink-0">
+        <img src={Logo} alt="" />
+      </div>
       <div className="markdown">
         <Markdown>{solution.solution}</Markdown>
       </div>

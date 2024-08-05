@@ -4,7 +4,12 @@ import {
   redirect,
 } from '@remix-run/node'
 import { Form, json, Link, useActionData } from '@remix-run/react'
-import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+import {
+  getFormProps,
+  getInputProps,
+  Submission,
+  useForm,
+} from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
@@ -25,8 +30,15 @@ import { Label } from '~/components/ui/label'
 import ErrorList from '~/components/ui/ErrorList'
 import { requireAnonymous } from '~/utils/auth.server'
 import { verifySessionStorage } from '~/utils/verification.server'
+import { VerificationSchema } from './verify'
 
 export const onboardingEmailSessionKey = 'onboardingEmail'
+
+export type VerifyFunctionArgs = {
+  request: Request
+  submission: Submission<z.infer<typeof VerificationSchema>>
+  body: FormData | URLSearchParams
+}
 
 const OnboardingSchema = z.object({
   firstName: z.string().min(3).max(50),

@@ -92,6 +92,27 @@ export async function login({
   return verifyUserPassword({ email }, password)
 }
 
+export async function resetUserPassword({
+  email,
+  password,
+}: {
+  email: User['email']
+  password: string
+}) {
+  const hashedPassword = await getPasswordHash(password)
+
+  return prisma.user.update({
+    where: { email },
+    data: {
+      password: {
+        update: {
+          hash: hashedPassword,
+        },
+      },
+    },
+  })
+}
+
 export async function signup({
   firstName,
   lastName,

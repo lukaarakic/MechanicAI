@@ -14,6 +14,7 @@ import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 import { checkHoneypot } from '~/utils/honeypot.server'
 import { checkCSRF } from '~/utils/csrf.server'
 import { EmailSchema } from '~/utils/user-validation'
+import { generateTOTP } from '@epic-web/totp'
 
 // Components
 import { Button } from '~/components/ui/button'
@@ -22,8 +23,9 @@ import { Label } from '~/components/ui/label'
 import ErrorList from '~/components/ui/ErrorList'
 import { requireAnonymous } from '~/utils/auth.server'
 import { prisma } from '~/utils/db.server'
-import { verifySessionStorage } from '~/utils/verification.server'
-import { onboardingEmailSessionKey } from './onboarding'
+import { getDomainUrl } from '~/utils/misc'
+import { sendEmail } from '~/utils/email.server'
+import { codeQueryParam, targetQueryParam, typeQueryParam } from './verify'
 
 const SignupSchema = z.object({
   email: EmailSchema,
@@ -81,16 +83,44 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const { email } = submission.value
 
-  const verifySession = await verifySessionStorage.getSession(
-    request.headers.get('cookie')
-  )
-  verifySession.set(onboardingEmailSessionKey, email)
-
-  return redirect('/onboarding', {
-    headers: {
-      'set-cookie': await verifySessionStorage.commitSession(verifySession),
-    },
+  const { otp, ...verificationConfig } = generateTOTP({
+    algorithm: 'SHA256',
+    period: 10 * 60,
   })
+
+  const redirectUrl = new URL(`${getDomainUrl(request)}/verify`)
+
+  const type = 'onboarding'
+  redirectUrl.searchParams.set(typeQueryParam, type)
+  redirectUrl.searchParams.set(targetQueryParam, email)
+
+  const verifyUrl = new URL(redirectUrl)
+  verifyUrl.searchParams.set(codeQueryParam, otp)
+
+  const verificationData = {
+    type,
+    target: email,
+    ...verificationConfig,
+    expiresAt: new Date(Date.now() + verificationConfig.period * 1000),
+  }
+
+  await prisma.verification.upsert({
+    where: {
+      target_type: { type, target: email },
+    },
+    create: verificationData,
+    update: verificationData,
+  })
+
+  await sendEmail({
+    to: email,
+    subject: `Welcome to MechanicAI!`,
+    text: `Here is your code ${otp}! ${verifyUrl}`,
+  })
+
+  console.log(otp, verifyUrl)
+
+  return redirect(redirectUrl.toString())
 }
 
 const Signup = () => {

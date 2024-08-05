@@ -61,3 +61,19 @@ model Solution {
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
+
+model Verification {
+  id        String    @id @default(cuid())
+  type      String
+  target    String
+  secret    String
+  algorithm String
+  digits    Int
+  period    Int
+  charSet   String
+  expiresAt DateTime?
+  // 
+  createdAt DateTime  @default(now())
+
+  @@unique([target, type])
+}

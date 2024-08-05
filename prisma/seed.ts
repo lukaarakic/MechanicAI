@@ -8,9 +8,9 @@ async function seed() {
   console.log('🌱 Seeding...')
   console.time(`🌱 Database has been seeded`)
 
-  // Deleting DB content
   console.time('🧹 Cleaned up the database...')
   await prisma.user.deleteMany()
+  await prisma.verification.deleteMany()
   console.timeEnd('🧹 Cleaned up the database...')
 
   const totalUsers = 5
