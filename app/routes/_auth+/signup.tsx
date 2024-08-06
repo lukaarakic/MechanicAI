@@ -1,6 +1,7 @@
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
+  MetaFunction,
   redirect,
 } from '@remix-run/node'
 import { Form, json, Link, useActionData } from '@remix-run/react'
@@ -26,6 +27,7 @@ import { prisma } from '~/utils/db.server'
 import { getDomainUrl } from '~/utils/misc'
 import { sendEmail } from '~/utils/email.server'
 import { codeQueryParam, targetQueryParam, typeQueryParam } from './verify'
+import { GeneralErrorBoundary } from '~/components/error-boundary'
 
 const SignupSchema = z.object({
   email: EmailSchema,
@@ -175,3 +177,32 @@ const Signup = () => {
   )
 }
 export default Signup
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'Sign up | MechanicAI' },
+    {
+      property: 'og:tittle',
+      content: 'Sign up | MechanicAI',
+    },
+    {
+      property: 'og:description',
+      content:
+        'Sign up for MechanicAI and start diagnosing your car problems. Join our community of car enthusiasts.',
+    },
+    {
+      name: 'description',
+      content:
+        'Sign up for MechanicAI and start diagnosing your car problems. Join our community of car enthusiasts.',
+    },
+    {
+      name: 'keywords',
+      content:
+        'MechanicAI, mechanicai sign up ,car diagnosis, car problems, car repair, automotive troubleshooting',
+    },
+  ]
+}
+
+export function ErrorBoundary() {
+  return <GeneralErrorBoundary />
+}

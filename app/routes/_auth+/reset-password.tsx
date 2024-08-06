@@ -5,6 +5,7 @@ import {
   ActionFunctionArgs,
   json,
   LoaderFunctionArgs,
+  MetaFunction,
   redirect,
 } from '@remix-run/node'
 import { Form } from '@remix-run/react'
@@ -129,6 +130,29 @@ const RestPassword = () => {
 }
 
 export default RestPassword
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'Reset Password | MechanicAI' },
+    {
+      property: 'og:tittle',
+      content: 'Reset Password | MechanicAI',
+    },
+    {
+      property: 'og:description',
+      content: 'Create a new password for your MechanicAI account.',
+    },
+    {
+      name: 'description',
+      content: 'Create a new password for your MechanicAI account.',
+    },
+    {
+      name: 'keywords',
+      content:
+        'MechanicAI, mechanicai reset password ,car diagnosis, car problems, car repair, automotive troubleshooting',
+    },
+  ]
+}
 
 export function ErrorBoundary() {
   return <GeneralErrorBoundary />

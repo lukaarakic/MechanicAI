@@ -1,6 +1,7 @@
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
+  MetaFunction,
   redirect,
 } from '@remix-run/node'
 import {
@@ -31,12 +32,38 @@ import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import ErrorList from '~/components/ui/ErrorList'
 import { requireAnonymous } from '~/utils/auth.server'
+import { GeneralErrorBoundary } from '~/components/error-boundary'
 
 const LoginSchema = z.object({
   email: EmailSchema,
   password: PasswordSchema,
   redirectTo: z.string().optional(),
 })
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'Login | MechanicAI' },
+    {
+      property: 'og:tittle',
+      content: 'Login | MechanicAI',
+    },
+    {
+      property: 'og:description',
+      content:
+        'Login to MechanicAI to diagnose your car problems. Answer a few questions and get expert insights into possible causes.',
+    },
+    {
+      name: 'description',
+      content:
+        'Login to MechanicAI to diagnose your car problems. Answer a few questions and get expert insights into possible causes.',
+    },
+    {
+      name: 'keywords',
+      content:
+        'MechanicAI, car diagnosis, car problems, car repair, automotive troubleshooting',
+    },
+  ]
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
   await requireAnonymous(request)
@@ -185,3 +212,7 @@ const Login = () => {
   )
 }
 export default Login
+
+export function ErrorBoundary() {
+  return <GeneralErrorBoundary />
+}

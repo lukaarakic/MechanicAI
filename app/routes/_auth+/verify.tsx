@@ -16,6 +16,7 @@ import {
   ActionFunctionArgs,
   json,
   LoaderFunctionArgs,
+  MetaFunction,
   redirect,
 } from '@remix-run/node'
 import { checkCSRF } from '~/utils/csrf.server'
@@ -28,6 +29,7 @@ import {
 } from '~/routes/_auth+/onboarding'
 import { invariant } from '~/utils/misc'
 import { verifySessionStorage } from '~/utils/verification.server'
+import { GeneralErrorBoundary } from '~/components/error-boundary'
 
 export const codeQueryParam = 'code'
 export const targetQueryParam = 'target'
@@ -267,3 +269,11 @@ const Verify = () => {
   )
 }
 export default Verify
+
+export const meta: MetaFunction = () => {
+  return [{ title: 'Verify | MechanicAI' }]
+}
+
+export function ErrorBoundary() {
+  return <GeneralErrorBoundary />
+}

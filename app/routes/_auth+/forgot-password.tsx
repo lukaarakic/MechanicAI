@@ -1,11 +1,17 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { Label } from '@radix-ui/react-label'
-import { ActionFunctionArgs, json, redirect } from '@remix-run/node'
+import {
+  ActionFunctionArgs,
+  json,
+  MetaFunction,
+  redirect,
+} from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { z } from 'zod'
+import { GeneralErrorBoundary } from '~/components/error-boundary'
 import { Button } from '~/components/ui/button'
 import ErrorList from '~/components/ui/ErrorList'
 import { Input } from '~/components/ui/input'
@@ -20,6 +26,31 @@ import { prepareVerification } from '~/utils/verify.server'
 const ForgotPasswordSchema = z.object({
   email: EmailSchema,
 })
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'Forgot Password | MechanicAI' },
+    {
+      property: 'og:tittle',
+      content: 'Forgot Password | MechanicAI',
+    },
+    {
+      property: 'og:description',
+      content:
+        'Reset your password for MechanicAI. Follow the steps to regain access to your account.',
+    },
+    {
+      name: 'description',
+      content:
+        'Reset your password for MechanicAI. Follow the steps to regain access to your account.',
+    },
+    {
+      name: 'keywords',
+      content:
+        'MechanicAI, car diagnosis, car problems, car repair, automotive troubleshooting',
+    },
+  ]
+}
 
 export async function action({ request }: ActionFunctionArgs) {
   await requireAnonymous(request)
@@ -140,3 +171,7 @@ const ForgotPassword = () => {
 }
 
 export default ForgotPassword
+
+export function ErrorBoundary() {
+  return <GeneralErrorBoundary />
+}

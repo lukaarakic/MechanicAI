@@ -1,6 +1,7 @@
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
+  MetaFunction,
   redirect,
 } from '@remix-run/node'
 import { Form, json, Link, useActionData } from '@remix-run/react'
@@ -31,6 +32,7 @@ import ErrorList from '~/components/ui/ErrorList'
 import { requireAnonymous } from '~/utils/auth.server'
 import { verifySessionStorage } from '~/utils/verification.server'
 import { VerificationSchema } from './verify'
+import { GeneralErrorBoundary } from '~/components/error-boundary'
 
 export const onboardingEmailSessionKey = 'onboardingEmail'
 
@@ -217,3 +219,32 @@ const Onboarding = () => {
   )
 }
 export default Onboarding
+
+export function ErrorBoundary() {
+  return <GeneralErrorBoundary />
+}
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'Onboaring | MechanicAI' },
+    {
+      property: 'og:tittle',
+      content: 'Onboaring | MechanicAI',
+    },
+    {
+      property: 'og:description',
+      content:
+        'Complete the onboarding process for MechanicAI. Get started with diagnosing your car problems.',
+    },
+    {
+      name: 'description',
+      content:
+        'Complete the onboarding process for MechanicAI. Get started with diagnosing your car problems.',
+    },
+    {
+      name: 'keywords',
+      content:
+        'MechanicAI, car diagnosis, car problems, car repair, automotive troubleshooting',
+    },
+  ]
+}
