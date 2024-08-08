@@ -1,6 +1,11 @@
 import { getFormProps, getTextareaProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { ActionFunctionArgs, json, redirect } from '@remix-run/node'
+import {
+  ActionFunctionArgs,
+  json,
+  MetaFunction,
+  redirect,
+} from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 import { z } from 'zod'
@@ -13,6 +18,7 @@ import { checkCSRF } from '~/utils/csrf.server'
 import OpenAI from 'openai'
 import { prisma } from '~/utils/db.server'
 import { invariantResponse, useIsPending } from '~/utils/misc'
+import { GeneralErrorBoundary } from '~/components/error-boundary'
 
 const ProblemSchema = z.object({
   problem: z.string().min(100),
@@ -152,8 +158,6 @@ export async function action({ request }: ActionFunctionArgs) {
     model: 'gpt-4o-mini',
   })
 
-  console.log(submission.value)
-
   const message = completion.choices[0].message.content
 
   invariantResponse(message, 'Something went wrong. Try later.', {
@@ -206,7 +210,7 @@ const NewProblem = () => {
 
   return (
     <>
-      <div className="w-[50%] mx-auto mt-12">
+      <div className="w-[95%] lg:w-[50%] mx-auto mt-12">
         <Form className="space-y-12" method="post" {...getFormProps(form)}>
           <AuthenticityTokenInput />
 
@@ -266,3 +270,32 @@ const NewProblem = () => {
   )
 }
 export default NewProblem
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'New Problem | MechanicAI' },
+    {
+      property: 'og:tittle',
+      content: 'New Problem | MechanicAI',
+    },
+    {
+      property: 'og:description',
+      content:
+        'Answer three simple questions on MechanicAI to diagnose your car problem. Get possible causes and solutions for your car issues.',
+    },
+    {
+      name: 'description',
+      content:
+        'Answer three simple questions on MechanicAI to diagnose your car problem. Get possible causes and solutions for your car issues.',
+    },
+    {
+      name: 'keywords',
+      content:
+        'MechanicAI ,car diagnosis, car problems, car repair, automotive troubleshooting',
+    },
+  ]
+}
+
+export function ErrorBoundary() {
+  return <GeneralErrorBoundary />
+}

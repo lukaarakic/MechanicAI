@@ -124,13 +124,13 @@ const Account = () => {
       <Separator className="my-5" />
 
       <Form
-        className="flex flex-col gap-4 mb-4"
+        className="flex flex-col gap-4 mb-8"
         method="post"
         {...getFormProps(form)}
       >
         <AuthenticityTokenInput />
 
-        <div className="flex w-full justify-between gap-4 items-end">
+        <div className="flex flex-col lg:flex-row w-full justify-between gap-4 items-end">
           <div className="w-full">
             <Label htmlFor={fields.firstName.id}>First Name</Label>
             <Input
@@ -163,20 +163,20 @@ const Account = () => {
             />
           </div>
 
-          <Button className="w-fit">Save</Button>
+          <Button className="w-full lg:w-fit">Save</Button>
         </div>
       </Form>
 
-      <Form className="mb-4">
+      <Form className="mb-8">
         <Label htmlFor="email">Email</Label>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col items-center gap-4">
           <Input
             placeholder="name@example.com"
             id="email"
             disabled={true}
             value={user.email}
           />
-          <Button>Change email</Button>
+          <Button className="w-full">Change email</Button>
         </div>
       </Form>
 

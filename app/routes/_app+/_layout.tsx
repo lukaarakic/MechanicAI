@@ -1,5 +1,4 @@
 import SolutionsSidebar from '~/components/SolutionsSidebar'
-import Logo from 'app/assets/Logo.svg'
 import { Form, Link, Outlet, useLoaderData } from '@remix-run/react'
 import {
   Popover,
@@ -33,13 +32,13 @@ const Layout = () => {
   const { user, solutions } = useLoaderData<typeof loader>()
 
   return (
-    <main className="flex h-dvh bg-slate-50 overflow-hidden relative">
+    <main className="flex h-[85dvh] lg:h-[90dvh] bg-slate-50 relative">
       <SolutionsSidebar solutions={solutions} />
 
       <div className="w-full px-8 pt-4">
         <div className="flex items-center justify-between w-full">
           <Link to="/">
-            <img src={Logo} alt="" className="w-16 h-full" />
+            {/* <img src={Logo} alt="" className="w-12 h-full" /> */}
           </Link>
 
           <Popover>
@@ -74,11 +73,11 @@ const Layout = () => {
           </Popover>
         </div>
 
-        <div className="overflow-y-auto h-full pb-28">
+        <div className="overflow-y-auto h-full lg:pb-28">
           <Outlet />
         </div>
 
-        <p className="absolute bottom-0 left-1/2 text-slate-400 font-medium text-14">
+        <p className="text-center text-slate-400 font-medium text-14">
           MechanicAI.app can make mistakes. Check important info
         </p>
       </div>

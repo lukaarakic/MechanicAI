@@ -1,5 +1,6 @@
 import { Solution } from '@prisma/client'
 import { NavLink } from '@remix-run/react'
+import { Button } from './ui/button'
 
 type SolutionSidebar = {
   id: Solution['id']
@@ -9,12 +10,12 @@ type SolutionSidebar = {
 
 const SolutionsSidebar = ({ solutions }: { solutions: SolutionSidebar[] }) => {
   return (
-    <div className="w-[20%] border-r border-r-slate-300 p-8">
+    <div className="w-[20%] border-r border-r-slate-300 p-8 h-dvh flex flex-col">
       <span className="text-24 font-semibold text-slate-950 mb-8 inline-block">
         Previous solutions
       </span>
 
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col gap-2 w-full overflow-y-auto h-[85%]">
         {solutions
           ? solutions.map((solution) => (
               <NavLink
@@ -33,6 +34,8 @@ const SolutionsSidebar = ({ solutions }: { solutions: SolutionSidebar[] }) => {
             ))
           : 'No solutions found...'}
       </div>
+
+      <Button className="w-full mt-auto">New Problem</Button>
     </div>
   )
 }

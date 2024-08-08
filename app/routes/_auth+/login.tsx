@@ -165,7 +165,7 @@ const Login = () => {
 
   return (
     <>
-      <Button variant={'ghost'} className="absolute right-8 top-8">
+      <Button variant={'outline'} className="absolute right-8 top-8">
         <Link to={'/signup'}>Sign up</Link>
       </Button>
 
@@ -202,6 +202,10 @@ const Login = () => {
           />
           <ErrorList id={fields.password.id} errors={fields.password.errors} />
         </div>
+
+        <Link to={'/forgot-password'} className="text-right">
+          <Button variant={'link'}>Forgot password?</Button>
+        </Link>
 
         <input {...getInputProps(fields.redirectTo, { type: 'hidden' })} />
 

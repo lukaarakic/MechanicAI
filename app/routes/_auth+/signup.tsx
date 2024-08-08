@@ -140,7 +140,7 @@ const Signup = () => {
 
   return (
     <>
-      <Button variant={'ghost'} className="absolute right-8 top-8">
+      <Button variant={'outline'} className="absolute right-8 top-8">
         <Link to={'/login'}>Login</Link>
       </Button>
 

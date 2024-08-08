@@ -16,14 +16,14 @@ const Layout = () => {
       <h1 className="text-24 font-semibold">Settings</h1>
       <p className="slate-600 text-14">Manage your account settings.</p>
 
-      <Button variant={'ghost'} className="absolute right-10 top-10">
+      <Button variant={'outline'} className="absolute right-10 top-10">
         <Link to={'/'}>Dashboard</Link>
       </Button>
 
       <Separator className="my-6" />
 
-      <div className="flex gap-20">
-        <div className="w-72 space-y-3">
+      <div className="flex flex-col lg:flex-row gap-10 lg:gap-20">
+        <div className="lg:w-72 lg:space-y-3 lg:block flex gap-2">
           <NavLink
             to={'/settings/account'}
             className={({ isActive }) =>
@@ -55,7 +55,8 @@ const Layout = () => {
             Car
           </NavLink>
         </div>
-        <div className="w-1/2">
+
+        <div className="lg:w-1/2">
           <Outlet />
         </div>
       </div>

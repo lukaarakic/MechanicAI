@@ -29,10 +29,11 @@ const Solution = () => {
   const { solution } = useLoaderData<typeof loader>()
 
   return (
-    <div className="max-w-[860px] mx-auto flex mt-11 gap-10">
-      <div className="w-14 h-14 rounded-full bg-slate-600 flex-shrink-0">
+    <div className="max-w-[860px] mx-auto flex mt-11 lg:gap-10 gap-4">
+      <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-full bg-slate-600 flex-shrink-0">
         <img src={Logo} alt="" />
       </div>
+
       <div className="markdown">
         <Markdown>{solution.solution}</Markdown>
       </div>

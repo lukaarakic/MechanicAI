@@ -38,10 +38,10 @@ async function seed() {
           },
         },
         solution: {
-          create: {
+          create: Array.from({ length: 20 }).map(() => ({
             solutionTitle: faker.lorem.text().slice(0, 20),
             solution: faker.lorem.paragraphs(),
-          },
+          })),
         },
       },
     })
