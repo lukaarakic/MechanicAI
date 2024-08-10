@@ -93,7 +93,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
           Here is an example answer: 
 
-          # Troubleshooting Guide for Ford Ranchero - Front Right Wheel Noise
+          # Front Right Wheel Noise
 
           ## Issue Summary
           You are experiencing a knocking or clunking noise from the front right wheel while driving, particularly when driving over bumps or imperfections in the road.

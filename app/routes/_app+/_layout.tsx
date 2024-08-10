@@ -10,6 +10,8 @@ import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 import { requireUser } from '~/utils/auth.server'
 import { json, LoaderFunctionArgs } from '@remix-run/node'
 import { prisma } from '~/utils/db.server'
+import { useState } from 'react'
+import { Menu } from 'lucide-react'
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireUser(request)
@@ -23,6 +25,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
       solution: true,
       solutionTitle: true,
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   })
 
   return json({ user, solutions })
@@ -30,16 +35,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 const Layout = () => {
   const { user, solutions } = useLoaderData<typeof loader>()
+  const [open, setOpen] = useState(false)
 
   return (
     <main className="flex h-[85dvh] lg:h-[90dvh] bg-slate-50 relative">
-      <SolutionsSidebar solutions={solutions} />
+      <SolutionsSidebar solutions={solutions} open={open} setOpen={setOpen} />
 
       <div className="w-full px-8 pt-4">
         <div className="flex items-center justify-between w-full">
-          <Link to="/">
-            {/* <img src={Logo} alt="" className="w-12 h-full" /> */}
-          </Link>
+          <button onClick={() => setOpen(true)} className="lg:hidden">
+            <Menu />
+          </button>
+          <div className="hidden lg:block"></div>
 
           <Popover>
             <PopoverTrigger>
