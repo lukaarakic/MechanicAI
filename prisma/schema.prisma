@@ -77,3 +77,8 @@ model Verification {
 
   @@unique([target, type])
 }
+
+model WaitlistEmail {
+  id    String @id @default(cuid())
+  email String
+}

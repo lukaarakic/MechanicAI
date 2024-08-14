@@ -12,6 +12,7 @@ import { json, LoaderFunctionArgs } from '@remix-run/node'
 import { prisma } from '~/utils/db.server'
 import { useState } from 'react'
 import { Menu } from 'lucide-react'
+import TextLogo from '~/assets/TextLogo.svg'
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireUser(request)
@@ -38,28 +39,30 @@ const Layout = () => {
   const [open, setOpen] = useState(false)
 
   return (
-    <main className="flex h-[85dvh] lg:h-[90dvh] bg-slate-50 relative">
+    <main className="relative flex h-[85dvh] bg-slate-50 lg:h-[90dvh]">
       <SolutionsSidebar solutions={solutions} open={open} setOpen={setOpen} />
 
       <div className="w-full px-8 pt-4">
-        <div className="flex items-center justify-between w-full">
+        <div className="flex w-full items-center justify-between">
           <button onClick={() => setOpen(true)} className="lg:hidden">
             <Menu />
           </button>
-          <div className="hidden lg:block"></div>
+          <Link to={'/'} className="hidden lg:block">
+            <img src={TextLogo} alt="" className="w-96" />
+          </Link>
 
           <Popover>
             <PopoverTrigger>
-              <div className="w-12 h-12 rounded-full overflow-hidden">
+              <div className="h-12 w-12 overflow-hidden rounded-full">
                 <img src={user.avatar} alt={`${user.firstName}'s avatar`} />
               </div>
             </PopoverTrigger>
             <PopoverContent>
               <div className="mb-2">
-                <span className="text-16 font-medium block leading-3">
+                <span className="block text-16 font-medium leading-3">
                   {user.firstName} {user.lastName}
                 </span>
-                <span className="text-slate-400 text-14 font-light">
+                <span className="text-14 font-light text-slate-400">
                   {user.email}
                 </span>
               </div>
@@ -80,11 +83,11 @@ const Layout = () => {
           </Popover>
         </div>
 
-        <div className="overflow-y-auto h-full lg:pb-28">
+        <div className="h-full overflow-y-auto lg:pb-28">
           <Outlet />
         </div>
 
-        <p className="text-center text-slate-400 font-medium text-14">
+        <p className="text-center text-14 font-medium text-slate-400">
           MechanicAI.app can make mistakes. Check important info
         </p>
       </div>

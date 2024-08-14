@@ -68,7 +68,7 @@
   }
 
   html {
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
   }
 
   /* Scrollbar */
@@ -78,11 +78,11 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-slate-100 rounded-lg;
+    @apply rounded-lg bg-slate-100;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-500 rounded-lg transition-colors;
+    @apply rounded-lg bg-slate-500 transition-colors;
   }
 
   ::-webkit-scrollbar-thumb:hover {
@@ -92,11 +92,11 @@
   /* Markdown */
 
   .markdown h1 {
-    @apply font-bold text-24 mb-4;
+    @apply mb-4 text-24 font-bold;
   }
 
   .markdown h2 {
-    @apply font-bold text-18 mb-2 mt-8;
+    @apply mb-2 mt-8 text-18 font-bold;
   }
 
   .markdown p {
@@ -126,10 +126,22 @@
 }
 
 @font-face {
-  font-family: 'Inter', sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue';
+  font-family:
+    'Inter',
+    sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    'Open Sans',
+    'Helvetica Neue';
   font-style: normal;
   font-weight: 400;
-  src: url('/fonts/Inter.woff2') format('woff2'),
+  src:
+    url('/fonts/Inter.woff2') format('woff2'),
     url('/fonts/Inter.woff') format('woff');
 }
