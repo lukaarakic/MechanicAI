@@ -10,9 +10,12 @@ import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 import { requireUser } from '~/utils/auth.server'
 import { json, LoaderFunctionArgs } from '@remix-run/node'
 import { prisma } from '~/utils/db.server'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Menu } from 'lucide-react'
 import TextLogo from '~/assets/TextLogo.svg'
+import CarModal from '~/components/car-model'
+import { carStorage } from '~/utils/car.server'
+import { useToast } from '~/components/ui/use-toast'
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireUser(request)
@@ -31,16 +34,43 @@ export async function loader({ request }: LoaderFunctionArgs) {
     },
   })
 
-  return json({ user, solutions })
+  const car = await prisma.car.findFirst({
+    where: {
+      userId: user.id,
+    },
+  })
+
+  const carSession = await carStorage.getSession(request.headers.get('cookie'))
+  const status = carSession.get('status')
+
+  return json({ user, solutions, car, status })
 }
 
 const Layout = () => {
-  const { user, solutions } = useLoaderData<typeof loader>()
+  const {
+    user,
+    solutions,
+    car,
+    status: formStatus,
+  } = useLoaderData<typeof loader>()
   const [open, setOpen] = useState(false)
+
+  const { toast } = useToast()
+
+  useEffect(() => {
+    if (formStatus === 'success') {
+      toast({
+        title: 'Car details updated',
+        description: 'Car details has been updated',
+      })
+    }
+  }, [formStatus, toast])
 
   return (
     <main className="relative flex h-[85dvh] bg-slate-50 lg:h-[90dvh]">
       <SolutionsSidebar solutions={solutions} open={open} setOpen={setOpen} />
+
+      {car ? null : <CarModal userCar={car} />}
 
       <div className="w-full px-8 pt-4">
         <div className="flex w-full items-center justify-between">

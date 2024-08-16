@@ -1,5 +1,6 @@
-import { json, LoaderFunctionArgs } from '@remix-run/node'
+import { json, LoaderFunctionArgs, MetaFunction } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
+import { GeneralErrorBoundary } from '~/components/error-boundary'
 import { Separator } from '~/components/ui/separator'
 import { requireUser } from '~/utils/auth.server'
 import { invariantResponse } from '~/utils/misc'
@@ -28,3 +29,17 @@ const Tokens = () => {
   )
 }
 export default Tokens
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'Tokens | MechanicAI' },
+    {
+      property: 'og:tittle',
+      content: 'Tokens | MechanicAI',
+    },
+  ]
+}
+
+export function ErrorBoundary() {
+  return <GeneralErrorBoundary />
+}

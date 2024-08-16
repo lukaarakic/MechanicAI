@@ -90,7 +90,7 @@ export async function action({ request }: ActionFunctionArgs) {
       {
         result: submission.reply(),
       },
-      { status: submission.status === 'error' ? 400 : 200 }
+      { status: submission.status === 'error' ? 400 : 200 },
     )
   }
 
@@ -137,10 +137,10 @@ const ForgotPassword = () => {
 
   return (
     <>
-      <div className="text-center mb-4">
+      <div className="mb-4 text-center">
         <h1 className="text-24 font-semibold">Forgot password</h1>
         <p className="text-16">
-          No worries, we&apos;ll send you reset instructions.
+          No worries, we'll send you reset instructions.
         </p>
       </div>
 

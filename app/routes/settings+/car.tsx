@@ -1,30 +1,38 @@
 import { useEffect, useState } from 'react'
 
-import { ActionFunctionArgs, json, LoaderFunctionArgs } from '@remix-run/node'
-import { Form, useActionData, useLoaderData } from '@remix-run/react'
+import { json, LoaderFunctionArgs, MetaFunction } from '@remix-run/node'
+import {
+  Form,
+  useActionData,
+  useLoaderData,
+  useNavigation,
+} from '@remix-run/react'
 
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 
-import { Button } from '~/components/ui/button'
 import { Combobox } from '~/components/ui/combobox'
 import ErrorList from '~/components/ui/ErrorList'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Separator } from '~/components/ui/separator'
 import { useToast } from '~/components/ui/use-toast'
+import StatusButton from '~/components/ui/status-button'
 
 import { fuel as fuelData, shifter as shifterData } from '~/data/car-data'
 
 import { requireUser } from '~/utils/auth.server'
-import { checkCSRF } from '~/utils/csrf.server'
 import { prisma } from '~/utils/db.server'
 
 import { z } from 'zod'
+import { GeneralErrorBoundary } from '~/components/error-boundary'
 
-const CarSchema = z.object({
+import { type action } from '~/routes/update-car'
+import { carStorage } from '~/utils/car.server'
+
+export const CarSchema = z.object({
   carBrand: z.string().min(2),
   carModel: z.string(),
   year: z.string(),
@@ -32,6 +40,8 @@ const CarSchema = z.object({
   engineSize: z.string(),
   power: z.string(),
   shifter: z.string(),
+
+  redirectUrl: z.string(),
 })
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -52,76 +62,25 @@ export async function loader({ request }: LoaderFunctionArgs) {
     },
   })
 
-  return json({ userCar })
-}
+  const carSession = await carStorage.getSession(request.headers.get('cookie'))
+  const status = carSession.get('status')
 
-export async function action({ request }: ActionFunctionArgs) {
-  const user = await requireUser(request)
-
-  const formData = await request.formData()
-  await checkCSRF(formData, request)
-
-  const submission = await parseWithZod(formData, {
-    schema: (intent) =>
-      CarSchema.transform(async (data) => {
-        if (intent !== null) return { ...data, user }
-
-        if (user.car?.id) {
-          await prisma.car.update({
-            where: {
-              userId: user.id,
-            },
-            data: {
-              carBrand: data.carBrand,
-              carModel: data.carModel,
-              engineSize: data.engineSize,
-              fuel: data.fuel,
-              power: data.power,
-              shifter: data.shifter,
-              year: data.year,
-            },
-          })
-
-          return { ...data }
-        }
-
-        if (!user.car?.id) {
-          await prisma.car.create({
-            data: {
-              carBrand: data.carBrand,
-              carModel: data.carModel,
-              engineSize: data.engineSize,
-              fuel: data.fuel,
-              power: data.power,
-              shifter: data.shifter,
-              year: data.year,
-              userId: user.id,
-            },
-          })
-
-          return { ...data }
-        }
-      }),
-    async: true,
-  })
-
-  if (submission.status !== 'success' || !submission.value) {
-    return json(
-      {
-        result: submission.reply(),
+  return json(
+    { userCar, status },
+    {
+      headers: {
+        'set-cookie': await carStorage.commitSession(carSession),
       },
-      {
-        status: submission.status === 'error' ? 400 : 200,
-      }
-    )
-  }
-
-  return json({ result: submission.reply() })
+    },
+  )
 }
 
 const Car = () => {
   const actionData = useActionData<typeof action>()
-  const { userCar } = useLoaderData<typeof loader>()
+  const { userCar, status: formStatus } = useLoaderData<typeof loader>()
+
+  const navigation = useNavigation()
+  const isSubmitting = navigation.formAction === '/update-car'
 
   const { toast } = useToast()
 
@@ -132,19 +91,22 @@ const Car = () => {
     id: 'car-form',
     constraint: getZodConstraint(CarSchema),
     lastResult: actionData?.result,
+    defaultValue: {
+      redirectUrl: '/settings/car',
+    },
     onValidate({ formData }) {
       return parseWithZod(formData, { schema: CarSchema })
     },
   })
 
   useEffect(() => {
-    if (actionData?.result.status === 'success') {
+    if (formStatus === 'success') {
       toast({
         title: 'Car details updated',
         description: 'Car details has been updated',
       })
     }
-  }, [actionData, toast])
+  }, [formStatus, toast])
 
   return (
     <>
@@ -155,7 +117,12 @@ const Car = () => {
 
       <Separator className="my-5" />
 
-      <Form className="space-y-4" method="post" {...getFormProps(form)}>
+      <Form
+        className="space-y-4"
+        method="post"
+        action="/update-car"
+        {...getFormProps(form)}
+      >
         <AuthenticityTokenInput />
 
         <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -248,9 +215,27 @@ const Car = () => {
           <ErrorList id={fields.shifter.id} errors={fields.shifter.errors} />
         </div>
 
-        <Button>Save</Button>
+        <Input {...getInputProps(fields.redirectUrl, { type: 'hidden' })} />
+
+        <StatusButton pendingText="Saving..." isPending={isSubmitting}>
+          Save
+        </StatusButton>
       </Form>
     </>
   )
 }
 export default Car
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'Car Settings | MechanicAI' },
+    {
+      property: 'og:tittle',
+      content: 'Car Settings | MechanicAI',
+    },
+  ]
+}
+
+export function ErrorBoundary() {
+  return <GeneralErrorBoundary />
+}

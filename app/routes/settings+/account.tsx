@@ -1,6 +1,11 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { ActionFunctionArgs, json, LoaderFunctionArgs } from '@remix-run/node'
+import {
+  ActionFunctionArgs,
+  json,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from '@remix-run/node'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
 import { useEffect } from 'react'
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
@@ -73,7 +78,7 @@ export async function action({ request }: ActionFunctionArgs) {
       },
       {
         status: submission.status === 'error' ? 400 : 200,
-      }
+      },
     )
   }
 
@@ -124,13 +129,13 @@ const Account = () => {
       <Separator className="my-5" />
 
       <Form
-        className="flex flex-col gap-4 mb-8"
+        className="mb-8 flex flex-col gap-4"
         method="post"
         {...getFormProps(form)}
       >
         <AuthenticityTokenInput />
 
-        <div className="flex flex-col lg:flex-row w-full justify-between gap-4 items-end">
+        <div className="flex w-full flex-col items-end justify-between gap-4 lg:flex-row">
           <div className="w-full">
             <Label htmlFor={fields.firstName.id}>First Name</Label>
             <Input
@@ -176,20 +181,22 @@ const Account = () => {
             disabled={true}
             value={user.email}
           />
-          <Button className="w-full">Change email</Button>
         </div>
-      </Form>
-
-      <Form className="flex flex-col gap-2 mb-5">
-        <Label htmlFor="password">Password</Label>
-        <Button variant={'destructive'} className="w-fit">
-          Change password
-        </Button>
       </Form>
     </>
   )
 }
 export default Account
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'Account Settings | MechanicAI' },
+    {
+      property: 'og:tittle',
+      content: 'Account Settings | MechanicAI',
+    },
+  ]
+}
 
 export function ErrorBoundary() {
   return (
