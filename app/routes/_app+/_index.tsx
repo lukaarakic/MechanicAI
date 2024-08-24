@@ -5,13 +5,22 @@ import { Button } from '~/components/ui/button'
 export const meta: MetaFunction = () => {
   return [
     { title: 'MechanicAI' },
-    { name: 'description', content: 'Welcome to Remix!' },
+    {
+      name: 'description',
+      content:
+        'Welcome to MechanicAI - the smart way to diagnose car problems. Get quick, accurate insights into your car issues by answering a few questions.',
+    },
+    {
+      name: 'keywords',
+      content:
+        'MechanicAI, car diagnosis, car problems, automotive troubleshooting, car repair, car issues, car maintenance',
+    },
   ]
 }
 
 export default function Index() {
   return (
-    <div className="h-full w-full flex items-center justify-center">
+    <div className="flex h-full w-full items-center justify-center">
       <Button>
         <Link to={'/problem/new'}>Solve new problem</Link>
       </Button>
