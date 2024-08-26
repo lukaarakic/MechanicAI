@@ -19,6 +19,7 @@ import OpenAI from 'openai'
 import { prisma } from '~/utils/db.server'
 import { invariantResponse, useIsPending } from '~/utils/misc'
 import { GeneralErrorBoundary } from '~/components/error-boundary'
+import Logo from '~/assets/Logo.svg'
 
 const ProblemSchema = z.object({
   problem: z.string().min(100),
@@ -56,7 +57,7 @@ export async function action({ request }: ActionFunctionArgs) {
       {
         result: submission.reply(),
       },
-      { status: submission.status === 'error' ? 400 : 200 }
+      { status: submission.status === 'error' ? 400 : 200 },
     )
   }
 
@@ -131,7 +132,7 @@ export async function action({ request }: ActionFunctionArgs) {
           - **Fuel Consumption**: Note any changes in fuel consumption patterns, as suspension issues can sometimes impact fuel efficiency if aligned components are not functioning correctly.
           - **Other Symptoms**: Document any additional symptoms such as handling issues, vibrations, or change in ride quality to help with diagnosis.
 
-          Make sure to address the issue promptly to avoid potential safety risks or further damage to the vehicle.
+          Make sure to address the issue promptly to avoid potential safety risks or further damage to the vehicle. Take your time to find out everything that can be issue. Also find common problems with car given to you, and see if thaht may be an issue.
           `,
       },
       {
@@ -210,7 +211,7 @@ const NewProblem = () => {
 
   return (
     <>
-      <div className="w-[95%] lg:w-[50%] mx-auto mt-12">
+      <div className="mx-auto mt-12 w-[95%] lg:w-[50%]">
         <Form className="space-y-12" method="post" {...getFormProps(form)}>
           <AuthenticityTokenInput />
 
@@ -251,19 +252,16 @@ const NewProblem = () => {
           </div>
 
           <ErrorList id={form.id} errors={form.errors} />
-          <div className="text-center -mt-3">
+          <div className="-mt-3 text-center">
             <Button>Find solution</Button>
           </div>
         </Form>
       </div>
 
       {isPending ? (
-        <div className="absolute top-0 left-0 h-dvh w-screen bg-slate-950 bg-opacity-50 flex items-center justify-center">
-          <div className="p-4 bg-white rounded-lg max-w-96">
-            Please allow me approximately 30 seconds to formulate my thoughts.
-            Avoid exiting the application...{' '}
-            <span className="animate-spin inline-block">🌀</span>
-          </div>
+        <div className="absolute left-0 top-0 z-50 flex h-dvh w-screen flex-col items-center justify-center bg-slate-950 bg-opacity-50">
+          <img src={Logo} alt="" className="animate-spin-slow w-[20vw]" />
+          <p className="mt-1 text-24 text-white">Please wait...</p>
         </div>
       ) : null}
     </>

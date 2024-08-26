@@ -71,6 +71,7 @@ module.exports = {
         'plugin:import/recommended',
         'plugin:import/typescript',
       ],
+      rules: { 'react/no-unescaped-entities': 0 },
     },
 
     // Node

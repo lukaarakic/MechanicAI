@@ -1,30 +1,27 @@
-import { getErrorMessage } from './misc'
+import { type ReactElement } from 'react'
+import { Resend } from 'resend'
 
-export async function sendEmail(options: {
+const resend = new Resend(import.meta.env.VITE_RESEND_API_KEY)
+
+export async function sendEmail({
+  to,
+  subject,
+  react,
+}: {
   to: string
   subject: string
-  html?: string
-  text: string
+  react: ReactElement
 }) {
-  const email = {
-    from: 'team@mechanicai.app',
-    ...options,
-  }
+  const from = 'team@mechanicai.app'
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    body: JSON.stringify(email),
-    headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      'content-type': 'application/json',
-    },
+  const { error } = await resend.emails.send({
+    from,
+    to,
+    subject,
+    react,
   })
 
-  const data = await response.json()
+  if (error) return { status: 'error', error: error }
 
-  if (response.ok) {
-    return { status: 'success' } as const
-  } else {
-    return { status: 'error', error: getErrorMessage(data) }
-  }
+  return { status: 'success' } as const
 }

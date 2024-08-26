@@ -22,6 +22,7 @@ import { sendEmail } from '~/utils/email.server'
 import { checkHoneypot } from '~/utils/honeypot.server'
 import { EmailSchema } from '~/utils/user-validation'
 import { prepareVerification } from '~/utils/verify.server'
+import EmailTemplate from '~/components/email-template'
 
 const ForgotPasswordSchema = z.object({
   email: EmailSchema,
@@ -115,7 +116,13 @@ export async function action({ request }: ActionFunctionArgs) {
   await sendEmail({
     to: user.email,
     subject: `MehanicAI Password Reset`,
-    text: `${verifyUrl.toString()} ${otp}`,
+    react: (
+      <EmailTemplate
+        redirectTo={verifyUrl.toString()}
+        otp={otp}
+        title="Drawgether Password Reset"
+      />
+    ),
   })
 
   console.log(otp)

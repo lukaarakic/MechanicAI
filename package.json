@@ -14,6 +14,7 @@
     "@conform-to/react": "^1.1.5",
     "@conform-to/zod": "^1.1.5",
     "@epic-web/totp": "^1.1.2",
+    "@paddle/paddle-js": "^1.2.1",
     "@prisma/client": "^5.17.0",
     "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-label": "^2.1.0",
@@ -21,6 +22,7 @@
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.1",
+    "@react-email/components": "0.0.23",
     "@remix-run/node": "^2.10.3",
     "@remix-run/react": "^2.10.3",
     "@remix-run/serve": "^2.10.3",
@@ -41,6 +43,7 @@
     "react-markdown": "^9.0.1",
     "react-toastify": "^10.0.5",
     "remix-utils": "^7.6.0",
+    "resend": "^4.0.0",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"

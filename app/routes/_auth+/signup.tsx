@@ -28,6 +28,7 @@ import { getDomainUrl } from '~/utils/misc'
 import { sendEmail } from '~/utils/email.server'
 import { codeQueryParam, targetQueryParam, typeQueryParam } from './verify'
 import { GeneralErrorBoundary } from '~/components/error-boundary'
+import EmailTemplate from '~/components/email-template'
 
 const SignupSchema = z.object({
   email: EmailSchema,
@@ -79,7 +80,7 @@ export async function action({ request }: ActionFunctionArgs) {
       {
         result: submission.reply(),
       },
-      { status: submission.status === 'error' ? 400 : 200 }
+      { status: submission.status === 'error' ? 400 : 200 },
     )
   }
 
@@ -114,13 +115,23 @@ export async function action({ request }: ActionFunctionArgs) {
     update: verificationData,
   })
 
-  await sendEmail({
+  const emailSent = await sendEmail({
     to: email,
     subject: `Welcome to MechanicAI!`,
-    text: `Here is your code ${otp}! ${verifyUrl}`,
+    react: (
+      <EmailTemplate
+        otp={otp}
+        redirectTo={verifyUrl.toString()}
+        title="MechanicAI Signup Verfication Code"
+      />
+    ),
   })
 
-  console.log(otp, verifyUrl)
+  if (emailSent.status === 'error') {
+    console.log(emailSent.error)
+
+    throw new Error('Something went wrong')
+  }
 
   return redirect(redirectUrl.toString())
 }
@@ -144,7 +155,7 @@ const Signup = () => {
         <Link to={'/login'}>Login</Link>
       </Button>
 
-      <div className="text-center mb-4">
+      <div className="mb-4 text-center">
         <h1 className="text-24 font-semibold">Create an account</h1>
         <p className="text-16">
           Enter your details below to create your account
