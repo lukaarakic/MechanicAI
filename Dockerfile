@@ -13,6 +13,7 @@
   COPY . .
   
   ENV DATABASE_URL="file:./prisma/data.db"
+  RUN npx prisma db push
   RUN npx prisma generate
   RUN npm run build
   
