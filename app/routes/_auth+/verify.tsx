@@ -1,17 +1,5 @@
-import { getFormProps, getInputProps, useForm } from '@conform-to/react'
-import { Label } from '@radix-ui/react-label'
+// Remix Imports
 import { Form, useActionData, useSearchParams } from '@remix-run/react'
-import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
-import { Button } from '~/components/ui/button'
-import ErrorList from '~/components/ui/ErrorList'
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from '~/components/ui/input-otp'
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp'
-import { z } from 'zod'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import {
   ActionFunctionArgs,
   json,
@@ -19,17 +7,45 @@ import {
   MetaFunction,
   redirect,
 } from '@remix-run/node'
+
+// Conform Imports
+import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+
+// Zod Imports
+import { z } from 'zod'
+
+// Radix UI Imports
+import { Label } from '@radix-ui/react-label'
+
+// Component Imports
+import Button from '~/components/ui/button'
+import ErrorList from '~/components/ui/ErrorList'
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from '~/components/ui/input-otp'
+import AuthHeader from '~/components/AuthHeader'
+import { GeneralErrorBoundary } from '~/components/error-boundary'
+
+// Utility Imports
 import { checkCSRF } from '~/utils/csrf.server'
 import { isCodeValid } from '~/utils/verify.server'
 import { prisma } from '~/utils/db.server'
+import { invariant } from '~/utils/misc'
+import { verifySessionStorage } from '~/utils/verification.server'
+
+// Constants Imports
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp'
 import { resetPasswordEmailSessionKey } from './reset-password'
 import {
   onboardingEmailSessionKey,
   VerifyFunctionArgs,
 } from '~/routes/_auth+/onboarding'
-import { invariant } from '~/utils/misc'
-import { verifySessionStorage } from '~/utils/verification.server'
-import { GeneralErrorBoundary } from '~/components/error-boundary'
+
+// Remix Utils Imports
+import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 
 export const codeQueryParam = 'code'
 export const targetQueryParam = 'target'
@@ -49,7 +65,7 @@ export const VerificationSchema = z.object({
 
 async function validateRequest(
   request: Request,
-  body: URLSearchParams | FormData
+  body: URLSearchParams | FormData,
 ) {
   const submission = await parseWithZod(body, {
     schema: () =>
@@ -77,7 +93,7 @@ async function validateRequest(
       {
         result: submission.reply(),
       },
-      { status: submission.status === 'error' ? 400 : 200 }
+      { status: submission.status === 'error' ? 400 : 200 },
     )
   }
 
@@ -113,13 +129,13 @@ async function handleOnboardingVerification({
       },
       {
         status: submission.status === 'error' ? 400 : 200,
-      }
+      },
     )
   }
 
   invariant(submission.value, 'submission.value should be defined by now')
   const verifySession = await verifySessionStorage.getSession(
-    request.headers.get('cookie')
+    request.headers.get('cookie'),
   )
   verifySession.set(onboardingEmailSessionKey, submission.value.target)
 
@@ -141,7 +157,7 @@ async function handleResetPasswordVerification({
       },
       {
         status: submission.status === 'error' ? 400 : 200,
-      }
+      },
     )
   }
 
@@ -162,7 +178,7 @@ async function handleResetPasswordVerification({
   }
 
   const verifySession = await verifySessionStorage.getSession(
-    request.headers.get('cookie')
+    request.headers.get('cookie'),
   )
   verifySession.set(resetPasswordEmailSessionKey, user.email)
 
@@ -216,12 +232,12 @@ const Verify = () => {
 
   return (
     <>
-      <div className="text-center mb-4">
-        <h1 className="text-24 font-semibold">Check your email</h1>
-        <p className="text-16">
-          We&ampos;ve sent you a code to verify your email address.
-        </p>
-      </div>
+      <AuthHeader title="Verify" subtitle="Please check your inbox." />
+
+      <p className="mb-30 text-center text-18 font-medium">
+        We sent a verification email to{' '}
+        <strong>{fields[targetQueryParam].value}</strong>.
+      </p>
 
       <Form
         {...getFormProps(form)}
@@ -230,9 +246,9 @@ const Verify = () => {
       >
         <AuthenticityTokenInput />
 
-        <div className="flex items-center flex-col justify-center">
+        <div className="flex flex-col items-center justify-center">
           <div>
-            <Label>Code</Label>
+            <Label className="mb-10 block">Enter verification code</Label>
             <InputOTP
               maxLength={6}
               pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
@@ -263,7 +279,7 @@ const Verify = () => {
         />
 
         <ErrorList id={form.errorId} errors={form.errors} />
-        <Button className="w-fit mx-auto">Submit</Button>
+        <Button className="mx-auto w-fit">Submit</Button>
       </Form>
     </>
   )

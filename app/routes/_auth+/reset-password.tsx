@@ -1,6 +1,11 @@
+// Conform
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+
+// Radix
 import { Label } from '@radix-ui/react-label'
+
+// Remix
 import {
   ActionFunctionArgs,
   json,
@@ -10,14 +15,21 @@ import {
 } from '@remix-run/node'
 import { Form } from '@remix-run/react'
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
+
+// Zod
 import { z } from 'zod'
-import { Button } from '~/components/ui/button'
+
+// Components
+import Button from '~/components/ui/button'
 import ErrorList from '~/components/ui/ErrorList'
-import { Input } from '~/components/ui/input'
+import Field from '~/components/ui/field'
+import AuthHeader from '~/components/AuthHeader'
+import { GeneralErrorBoundary } from '~/components/error-boundary'
+
+// Utils
 import { PasswordSchema } from '~/utils/user-validation'
 import { verifySessionStorage } from '~/utils/verification.server'
 import { requireAnonymous, resetUserPassword } from '~/utils/auth.server'
-import { GeneralErrorBoundary } from '~/components/error-boundary'
 
 export const resetPasswordEmailSessionKey = 'resetPasswordEmail'
 
@@ -35,7 +47,7 @@ async function requireResetPasswordEmail(request: Request) {
   await requireAnonymous(request)
 
   const verifySession = await verifySessionStorage.getSession(
-    request.headers.get('cookie')
+    request.headers.get('cookie'),
   )
   const resetPasswordEmail = verifySession.get(resetPasswordEmailSessionKey)
 
@@ -65,7 +77,7 @@ export async function action({ request }: ActionFunctionArgs) {
       },
       {
         status: submission.status === 'error' ? 400 : 200,
-      }
+      },
     )
   }
 
@@ -74,7 +86,7 @@ export async function action({ request }: ActionFunctionArgs) {
   await resetUserPassword({ email: resestPasswordEmail, password })
 
   const verifySession = await verifySessionStorage.getSession(
-    request.headers.get('cookie')
+    request.headers.get('cookie'),
   )
 
   return redirect('/login', {
@@ -97,27 +109,28 @@ const RestPassword = () => {
 
   return (
     <>
-      <div className="text-center mb-4">
-        <h1 className="text-24 font-semibold">Forgot password</h1>
-        <p className="text-16">
-          No worries, we&apos;ll send you reset instructions.
-        </p>
-      </div>
+      <AuthHeader
+        title="Reset Password"
+        subtitle="No worries, we'll send you reset instructions."
+      />
 
       <Form
         {...getFormProps(form)}
         method="post"
-        className="flex flex-col gap-4"
+        className="flex w-full flex-col"
       >
         <AuthenticityTokenInput />
 
-        <div>
+        <div className="mb-40">
           <Label htmlFor={fields.password.id}>New password</Label>
-          <Input {...getInputProps(fields.password, { type: 'password' })} />
+          <Field
+            className="mb-20"
+            {...getInputProps(fields.password, { type: 'password' })}
+          />
 
           <Label htmlFor={fields.confirmPassword.id}>Confirm password</Label>
 
-          <Input
+          <Field
             {...getInputProps(fields.confirmPassword, { type: 'password' })}
           />
         </div>

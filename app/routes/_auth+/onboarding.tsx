@@ -1,10 +1,13 @@
+// Remix Imports
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   MetaFunction,
   redirect,
 } from '@remix-run/node'
-import { Form, json, Link, useActionData } from '@remix-run/react'
+import { Form, json, useActionData } from '@remix-run/react'
+
+// Conform Imports
 import {
   getFormProps,
   getInputProps,
@@ -12,6 +15,8 @@ import {
   useForm,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+
+// Third-Party Libraries
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
 
@@ -23,16 +28,16 @@ import { checkCSRF } from '~/utils/csrf.server'
 import { prisma } from '~/utils/db.server'
 import { sessionStorage } from '~/utils/session.server'
 import { PasswordSchema } from '~/utils/user-validation'
-
-// Components
-import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
-import { Label } from '~/components/ui/label'
-import ErrorList from '~/components/ui/ErrorList'
 import { requireAnonymous } from '~/utils/auth.server'
 import { verifySessionStorage } from '~/utils/verification.server'
 import { VerificationSchema } from './verify'
+
+// Components
+import Button from '~/components/ui/button'
+import Field from '~/components/ui/field'
+import ErrorList from '~/components/ui/ErrorList'
 import { GeneralErrorBoundary } from '~/components/error-boundary'
+import AuthHeader from '~/components/AuthHeader'
 
 export const onboardingEmailSessionKey = 'onboardingEmail'
 
@@ -50,7 +55,7 @@ const OnboardingSchema = z.object({
 
 async function requireOnboardingEmail(request: Request) {
   const verifySession = await verifySessionStorage.getSession(
-    request.headers.get('cookie')
+    request.headers.get('cookie'),
   )
   const email = verifySession.get(onboardingEmailSessionKey)
 
@@ -108,29 +113,29 @@ export async function action({ request }: ActionFunctionArgs) {
       },
       {
         status: submission.status === 'error' ? 400 : 200,
-      }
+      },
     )
   }
 
   const { user } = submission.value
 
   const cookieSession = await sessionStorage.getSession(
-    request.headers.get('cookie')
+    request.headers.get('cookie'),
   )
   cookieSession.set('userId', user.id)
 
   const verifySession = await verifySessionStorage.getSession(
-    request.headers.get('cookie')
+    request.headers.get('cookie'),
   )
   const headers = new Headers()
 
   headers.append(
     'set-cookie',
-    await sessionStorage.commitSession(cookieSession)
+    await sessionStorage.commitSession(cookieSession),
   )
   headers.append(
     'set-cookie',
-    await verifySessionStorage.destroySession(verifySession)
+    await verifySessionStorage.destroySession(verifySession),
   )
 
   return redirect('/', {
@@ -153,33 +158,24 @@ const Onboarding = () => {
 
   return (
     <>
-      <Button variant={'ghost'} className="absolute right-8 top-8">
-        <Link to={'/login'}>Login</Link>
-      </Button>
+      <AuthHeader
+        title="Register"
+        subtitle="Enter your credentials to create an account"
+      />
 
-      <div className="text-center mb-4">
-        <h1 className="text-24 font-semibold">Welcome aboard</h1>
-        <p className="text-16">
-          Enter your details below to create your account
-        </p>
-      </div>
-
-      <Form
-        {...getFormProps(form)}
-        method="post"
-        className="flex flex-col gap-4"
-      >
+      <Form {...getFormProps(form)} method="post" className="w-full">
         <AuthenticityTokenInput />
         <HoneypotInputs />
 
-        <div className="flex w-full justify-between gap-4">
+        <div className="mb-20 flex w-full flex-col gap-5 lg:flex-row">
           <div className="w-full">
-            <Label>First Name</Label>
-            <Input
+            <Field
+              label="First Name"
               placeholder="John"
               {...getInputProps(fields.firstName, {
                 type: 'text',
               })}
+              className="w-full lg:w-[14.375rem]"
             />
             <ErrorList
               id={fields.firstName.id}
@@ -187,12 +183,13 @@ const Onboarding = () => {
             />
           </div>
           <div className="w-full">
-            <Label htmlFor="last-name">Last Name</Label>
-            <Input
+            <Field
+              label="Last Name"
               placeholder="Smith"
               {...getInputProps(fields.lastName, {
                 type: 'text',
               })}
+              className="w-full lg:w-[14.375rem]"
             />
             <ErrorList
               id={fields.lastName.id}
@@ -201,9 +198,9 @@ const Onboarding = () => {
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="password">Password</Label>
-          <Input
+        <div className="mb-40">
+          <Field
+            label="Password"
             placeholder="********"
             {...getInputProps(fields.password, {
               type: 'password',
@@ -213,7 +210,7 @@ const Onboarding = () => {
         </div>
 
         <ErrorList id={form.errorId} errors={form.errors} />
-        <Button>Sign up</Button>
+        <Button className="w-full">Create an account</Button>
       </Form>
     </>
   )

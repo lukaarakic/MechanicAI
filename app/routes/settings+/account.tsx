@@ -1,5 +1,4 @@
-import { getFormProps, getInputProps, useForm } from '@conform-to/react'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+// Remix imports
 import {
   ActionFunctionArgs,
   json,
@@ -7,20 +6,34 @@ import {
   MetaFunction,
 } from '@remix-run/node'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
+
+// Conform imports
+import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+
+// React imports
 import { useEffect } from 'react'
+
+// UI components
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
-import { z } from 'zod'
-import { GeneralErrorBoundary } from '~/components/error-boundary'
-import { Button } from '~/components/ui/button'
+import Button from '~/components/ui/button'
 import ErrorList from '~/components/ui/ErrorList'
-import { Input } from '~/components/ui/input'
+import Field from '~/components/ui/field'
 import { Label } from '~/components/ui/label'
-import { Separator } from '~/components/ui/separator'
+import Separator from '~/components/ui/separator'
 import { useToast } from '~/components/ui/use-toast'
+
+// Utility functions
 import { requireUser } from '~/utils/auth.server'
 import { checkCSRF } from '~/utils/csrf.server'
 import { prisma } from '~/utils/db.server'
 import { invariantResponse } from '~/utils/misc'
+
+// Error boundary
+import { GeneralErrorBoundary } from '~/components/error-boundary'
+
+// Zod imports
+import { z } from 'zod'
 
 const AccountSchema = z.object({
   firstName: z
@@ -114,31 +127,25 @@ const Account = () => {
       toast({
         title: 'Profile updated',
         description: 'Profile has been updated',
+        duration: 2000,
       })
     }
   }, [actionData, toast])
 
   return (
-    <>
-      <h1 className="text-18 font-semibold">Account</h1>
-      <p className="slate-600 text-14">
-        Update your account settings. Set you preferred e-mail and change
-        password.
-      </p>
+    <div className="w-full">
+      <p className="text-18 font-bold">Account</p>
+      <p>Update your account settings.</p>
 
-      <Separator className="my-5" />
+      <Separator />
 
-      <Form
-        className="mb-8 flex flex-col gap-4"
-        method="post"
-        {...getFormProps(form)}
-      >
+      <Form className="mb-20 max-w-xl" method="post" {...getFormProps(form)}>
         <AuthenticityTokenInput />
 
-        <div className="flex w-full flex-col items-end justify-between gap-4 lg:flex-row">
+        <div className="flex flex-col gap-20 md:flex-row">
           <div className="w-full">
             <Label htmlFor={fields.firstName.id}>First Name</Label>
-            <Input
+            <Field
               placeholder="John"
               {...getInputProps(fields.firstName, {
                 type: 'text',
@@ -154,7 +161,7 @@ const Account = () => {
 
           <div className="w-full">
             <Label htmlFor={fields.lastName.id}>Last Name</Label>
-            <Input
+            <Field
               placeholder="Smith"
               {...getInputProps(fields.lastName, {
                 type: 'text',
@@ -167,23 +174,26 @@ const Account = () => {
               errors={fields.lastName.errors}
             />
           </div>
-
-          <Button className="w-full lg:w-fit">Save</Button>
         </div>
+        <Button className="mt-10 block w-full text-right !text-16 md:ml-auto md:w-auto">
+          Update profile
+        </Button>
       </Form>
 
-      <Form className="mb-8">
+      <div className="max-w-xl">
         <Label htmlFor="email">Email</Label>
         <div className="flex flex-col items-center gap-4">
-          <Input
+          <Field
             placeholder="name@example.com"
-            id="email"
             disabled={true}
             value={user.email}
+            id="email"
+            type="text"
+            name="email"
           />
         </div>
-      </Form>
-    </>
+      </div>
+    </div>
   )
 }
 export default Account

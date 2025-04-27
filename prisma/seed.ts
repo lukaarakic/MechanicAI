@@ -27,7 +27,8 @@ async function seed() {
           create: createPassword(userData.email),
         },
         car: {
-          create: {
+          create: Array.from({ length: 2 }).map((_, i) => ({
+            defaultCar: i === 0,
             carBrand: faker.vehicle.manufacturer(),
             carModel: faker.vehicle.model(),
             engineSize: `${faker.number.int({ min: 999, max: 10000 })}cc`,
@@ -35,12 +36,15 @@ async function seed() {
             power: `${faker.number.int({ min: 10, max: 1000 })}kW`,
             shifter: 'Automatic',
             year: '2024',
-          },
+          })),
         },
         solution: {
-          create: Array.from({ length: 20 }).map(() => ({
+          create: Array.from({ length: 5 }).map(() => ({
             solutionTitle: faker.lorem.text().slice(0, 20),
             solution: faker.lorem.paragraphs(),
+            problem: faker.lorem.paragraphs(),
+            dashboardLights: faker.lorem.paragraphs(),
+            diagnostic: faker.lorem.paragraphs(),
           })),
         },
       },

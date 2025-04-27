@@ -1,25 +1,39 @@
-import { Outlet } from '@remix-run/react'
-import TextAltLogo from '~/assets/TextAltLogo.svg'
-import TextLogo from '~/assets/TextLogo.svg'
+import { Link, Outlet, useLocation } from '@remix-run/react'
 
-const Layout = () => {
+import WhiteLogo from '~/assets/logo-white.svg?react'
+
+const AuthLayout = () => {
+  const { pathname } = useLocation()
+
   return (
-    <div className="flex h-dvh bg-slate-900">
-      <div className="hidden h-full p-9 lg:block lg:w-1/2">
-        <img src={TextAltLogo} alt="" className="w-96" />
-      </div>
-      <div className="relative flex h-full w-full items-center justify-center bg-slate-50 lg:w-1/2">
-        <img
-          src={TextLogo}
-          alt=""
-          className="absolute bottom-4 w-full px-4 lg:hidden"
-        />
+    <div className="flex h-dvh flex-col items-center justify-center gap-20">
+      <div className="flex w-full flex-col items-center rounded-12 p-20 lg:w-[35.125rem] lg:border lg:border-white lg:p-40">
+        <WhiteLogo className="mb-30 w-16" />
 
-        <div className="mx-auto p-4 md:w-[65%]">
-          <Outlet />
-        </div>
+        <Outlet />
       </div>
+
+      {pathname === '/signup' ? (
+        <p>
+          Already have an account?{' '}
+          <Link to={'/login'} className="text-blue-700">
+            Log in
+          </Link>
+        </p>
+      ) : pathname === '/login' ? (
+        <p>
+          Don’t have an account yet?{' '}
+          <Link to={'/signup'} className="text-blue-700">
+            Sign up
+          </Link>
+        </p>
+      ) : pathname === '/verify' ? (
+        <Link to={'/signup'} className="text-blue-700">
+          Go back to sign up
+        </Link>
+      ) : null}
     </div>
   )
 }
-export default Layout
+
+export default AuthLayout

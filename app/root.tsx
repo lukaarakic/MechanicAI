@@ -1,3 +1,4 @@
+// Remix Core Imports
 import {
   json,
   Links,
@@ -9,24 +10,29 @@ import {
 } from '@remix-run/react'
 import { LoaderFunctionArgs, redirect } from '@remix-run/node'
 
+// Utility Providers
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
+
+// Server Utilities
 import { csrf } from './utils/csrf.server'
 import { sessionStorage } from './utils/session.server'
 import { honeypot } from './utils/honeypot.server'
 import { prisma } from './utils/db.server'
 import { combineHeaders } from './utils/misc'
 
+// Components
 import { Toaster } from './components/ui/toaster'
 import { GeneralErrorBoundary } from './components/error-boundary'
 
+// Styles
 import '~/tailwind.css'
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const honeyProps = honeypot.getInputProps()
   const [csrfToken, csrfCookieHeader] = await csrf.commitToken(request)
   const cookieSession = await sessionStorage.getSession(
-    request.headers.get('cookie')
+    request.headers.get('cookie'),
   )
 
   const userId = cookieSession.get('userId')
@@ -59,9 +65,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
     { honeyProps, csrfToken, user },
     {
       headers: combineHeaders(
-        csrfCookieHeader ? { 'set-cookie': csrfCookieHeader } : null
+        csrfCookieHeader ? { 'set-cookie': csrfCookieHeader } : null,
       ),
-    }
+    },
   )
 }
 

@@ -1,66 +1,83 @@
-import { json, LoaderFunctionArgs } from '@remix-run/node'
-import { Link, NavLink, Outlet } from '@remix-run/react'
-import { Button } from '~/components/ui/button'
-import { Separator } from '~/components/ui/separator'
-import { requireUserId } from '~/utils/auth.server'
+// Remix imports
+import { LoaderFunctionArgs } from '@remix-run/node'
+import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
+
+// Components
+import GradientHeading from '~/components/GradientHeading'
+import Navbar from '~/components/Navbar'
+import Separator from '~/components/ui/separator'
+
+// Utilities
+import { requireUser } from '~/utils/auth.server'
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  await requireUserId(request)
+  const user = await requireUser(request)
 
-  return json({})
+  return user
 }
 
+// className="h-full w-full pl-[8.125rem] pr-70 pt-50"
+
 const Layout = () => {
+  const user = useLoaderData<typeof loader>()
+
   return (
-    <main className="p-10 relative">
-      <h1 className="text-24 font-semibold">Settings</h1>
-      <p className="slate-600 text-14">Manage your account settings.</p>
+    <>
+      <div className="flex min-h-[calc(100dvh-5rem)] gap-10 pb-100 md:min-h-dvh md:pb-0">
+        <Navbar
+          firstName={user.firstName}
+          lastName={user.lastName}
+          email={user.email}
+          avatar={user.avatar}
+        />
 
-      <Button variant={'outline'} className="absolute right-10 top-10">
-        <Link to={'/'}>Dashboard</Link>
-      </Button>
+        <main className="h-full w-full p-20 pt-50 md:ml-80 md:pl-[8.125rem] md:pr-70">
+          <GradientHeading size="sm" className="!mx-0 mb-5">
+            Settings
+          </GradientHeading>
+          <p>Manage your account settings</p>
+          <Separator />
+          <div className="gap-70 md:flex">
+            <div className="mb-40 grid grid-cols-2 gap-10 md:flex md:flex-col">
+              <NavLink
+                to="/settings/account"
+                className={({ isActive }) =>
+                  `rounded-7 border border-white/10 px-50 py-10 text-center ${
+                    isActive ? 'text-blue-700' : 'text-white'
+                  }`
+                }
+              >
+                Account
+              </NavLink>
 
-      <Separator className="my-6" />
+              <NavLink
+                to="/settings/car"
+                className={({ isActive }) =>
+                  `rounded-7 border border-white/10 px-50 py-10 text-center ${
+                    isActive ? 'text-blue-700' : 'text-white'
+                  }`
+                }
+              >
+                Car
+              </NavLink>
 
-      <div className="flex flex-col lg:flex-row gap-10 lg:gap-20">
-        <div className="lg:w-72 lg:space-y-3 lg:block flex gap-2">
-          <NavLink
-            to={'/settings/account'}
-            className={({ isActive }) =>
-              isActive
-                ? 'bg-slate-200 text-14 font-medium py-2 w-full inline-block text-center rounded-lg'
-                : 'bg-white text-14 font-medium py-2 w-full inline-block rounded-lg text-center transition-colors hover:bg-slate-100'
-            }
-          >
-            Account
-          </NavLink>
-          <NavLink
-            to={'/settings/tokens'}
-            className={({ isActive }) =>
-              isActive
-                ? 'bg-slate-200 text-14 font-medium py-2 w-full inline-block text-center rounded-lg'
-                : 'bg-white text-14 font-medium py-2 w-full inline-block rounded-lg text-center transition-colors hover:bg-slate-100'
-            }
-          >
-            Tokens
-          </NavLink>
-          <NavLink
-            to={'/settings/car'}
-            className={({ isActive }) =>
-              isActive
-                ? 'bg-slate-200 text-14 font-medium py-2 w-full inline-block text-center rounded-lg'
-                : 'bg-white text-14 font-medium py-2 w-full inline-block rounded-lg text-center transition-colors hover:bg-slate-100'
-            }
-          >
-            Car
-          </NavLink>
-        </div>
+              <NavLink
+                to="/settings/tokens"
+                className={({ isActive }) =>
+                  `col-span-full rounded-7 border border-white/10 px-50 py-10 text-center ${
+                    isActive ? 'text-blue-700' : 'text-white'
+                  }`
+                }
+              >
+                Tokens
+              </NavLink>
+            </div>
 
-        <div className="lg:w-1/2">
-          <Outlet />
-        </div>
+            <Outlet />
+          </div>
+        </main>
       </div>
-    </main>
+    </>
   )
 }
 export default Layout

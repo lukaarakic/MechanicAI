@@ -9,9 +9,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -25,7 +24,7 @@ model User {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   // 
-  car       Car?
+  car       Car[]
   password  Password?
   solution  Solution[]
 }
@@ -37,7 +36,7 @@ model Password {
 }
 
 model Car {
-  id         String @id @default(cuid())
+  id         String     @id @default(cuid())
   carBrand   String
   carModel   String
   year       String
@@ -45,21 +44,33 @@ model Car {
   engineSize String
   power      String
   shifter    String
+  defaultCar Boolean    @default(false)
   // 
-  userId     String @unique
-  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  //
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Solution   Solution[]
 }
 
 model Solution {
-  id            String   @id @default(cuid())
-  solution      String
-  solutionTitle String
+  id              String   @id @default(cuid())
+  solution        String
+  solutionTitle   String
+  category        String?
   // 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  problem         String
+  diagnostic      String
+  dashboardLights String
   // 
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  // 
+  carId           String?
+  car             Car?     @relation(fields: [carId], references: [id])
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Verification {

@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { flatRoutes } from 'remix-flat-routes'
 import { installGlobals } from '@remix-run/node'
+import svgr from 'vite-plugin-svgr'
 
 installGlobals()
 
@@ -21,5 +22,6 @@ export default defineConfig({
       },
     }),
     tsconfigPaths(),
+    svgr(),
   ],
 })

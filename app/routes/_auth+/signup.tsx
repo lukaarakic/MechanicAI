@@ -1,33 +1,43 @@
+// Remix imports
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   MetaFunction,
   redirect,
 } from '@remix-run/node'
-import { Form, json, Link, useActionData } from '@remix-run/react'
+import { Form, json, useActionData } from '@remix-run/react'
+
+// Conform imports
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+
+// Zod imports
 import { z } from 'zod'
 
-// Utils
+// Utility imports
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 import { checkHoneypot } from '~/utils/honeypot.server'
 import { checkCSRF } from '~/utils/csrf.server'
 import { EmailSchema } from '~/utils/user-validation'
 import { generateTOTP } from '@epic-web/totp'
-
-// Components
-import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
-import { Label } from '~/components/ui/label'
-import ErrorList from '~/components/ui/ErrorList'
 import { requireAnonymous } from '~/utils/auth.server'
 import { prisma } from '~/utils/db.server'
 import { getDomainUrl } from '~/utils/misc'
-import { sendEmail } from '~/utils/email.server'
 import { codeQueryParam, targetQueryParam, typeQueryParam } from './verify'
+
+// Component imports
+import Button from '~/components/ui/button'
+import Field from '~/components/ui/field'
+import ErrorList from '~/components/ui/ErrorList'
 import { GeneralErrorBoundary } from '~/components/error-boundary'
+import AuthHeader from '~/components/AuthHeader'
+
+// Asset imports
+// import GoogleLogo from '~/assets/icons/google-logo.png'
+
+// Email imports (commented out)
+import { sendEmail } from '~/utils/email.server'
 import EmailTemplate from '~/components/email-template'
 
 const SignupSchema = z.object({
@@ -133,6 +143,8 @@ export async function action({ request }: ActionFunctionArgs) {
     throw new Error('Something went wrong')
   }
 
+  console.log(otp)
+
   return redirect(redirectUrl.toString())
 }
 
@@ -151,29 +163,31 @@ const Signup = () => {
 
   return (
     <>
-      <Button variant={'outline'} className="absolute right-8 top-8">
-        <Link to={'/login'}>Login</Link>
-      </Button>
+      <AuthHeader
+        title="Sign up"
+        subtitle="Create your MechanicAI account with your email to sync all solutions
+        across your devices"
+      />
+      {/* 
+      <button className="mb-30 box-border flex h-[3.125rem] w-full cursor-pointer items-center justify-center rounded-7 border-2 border-white py-15 text-18 font-medium">
+        <img src={GoogleLogo} alt="Google Logo" className="mr-3" />
+        Continue with Google
+      </button> */}
 
-      <div className="mb-4 text-center">
-        <h1 className="text-24 font-semibold">Create an account</h1>
-        <p className="text-16">
-          Enter your details below to create your account
-        </p>
-      </div>
+      {/* <div className="flex w-full items-center justify-center gap-3 opacity-50">
+        <div className="h-0.5 w-full bg-white" />
+        <span className="text-13 font-semibold">OR</span>
+        <div className="h-0.5 w-full bg-white" />
+      </div> */}
 
-      <Form
-        {...getFormProps(form)}
-        method="post"
-        className="flex flex-col gap-4"
-      >
+      <Form {...getFormProps(form)} method="post" className="w-full">
         <AuthenticityTokenInput />
         <HoneypotInputs />
 
         <div>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            placeholder="name@example.com"
+          <Field
+            label="Email"
+            placeholder="yourname@example.com"
             {...getInputProps(fields.email, {
               type: 'text',
             })}
@@ -182,7 +196,10 @@ const Signup = () => {
         </div>
 
         <ErrorList id={form.errorId} errors={form.errors} />
-        <Button>Sign up</Button>
+        <Button className="mt-30 h-[3.125rem] w-full">
+          {' '}
+          Continue with email
+        </Button>
       </Form>
     </>
   )

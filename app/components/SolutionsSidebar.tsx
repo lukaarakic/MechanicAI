@@ -1,6 +1,6 @@
 import { Solution } from '@prisma/client'
 import { Link, NavLink } from '@remix-run/react'
-import { Button } from './ui/button'
+import Button from '~/components/ui/button'
 import { X } from 'lucide-react'
 
 type SolutionSidebar = {

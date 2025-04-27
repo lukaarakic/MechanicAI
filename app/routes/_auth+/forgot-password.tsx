@@ -1,6 +1,11 @@
+// Conform
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+
+// Radix UI
 import { Label } from '@radix-ui/react-label'
+
+// Remix
 import {
   ActionFunctionArgs,
   json,
@@ -8,13 +13,22 @@ import {
   redirect,
 } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
+
+// Remix Utils
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 import { HoneypotInputs } from 'remix-utils/honeypot/react'
+
+// Zod
 import { z } from 'zod'
+
+// Components
 import { GeneralErrorBoundary } from '~/components/error-boundary'
-import { Button } from '~/components/ui/button'
+import Button from '~/components/ui/button'
 import ErrorList from '~/components/ui/ErrorList'
-import { Input } from '~/components/ui/input'
+import Field from '~/components/ui/field'
+import EmailTemplate from '~/components/email-template'
+
+// Utils
 import { requireAnonymous } from '~/utils/auth.server'
 import { checkCSRF } from '~/utils/csrf.server'
 import { prisma } from '~/utils/db.server'
@@ -22,7 +36,6 @@ import { sendEmail } from '~/utils/email.server'
 import { checkHoneypot } from '~/utils/honeypot.server'
 import { EmailSchema } from '~/utils/user-validation'
 import { prepareVerification } from '~/utils/verify.server'
-import EmailTemplate from '~/components/email-template'
 
 const ForgotPasswordSchema = z.object({
   email: EmailSchema,
@@ -144,7 +157,7 @@ const ForgotPassword = () => {
 
   return (
     <>
-      <div className="mb-4 text-center">
+      <div className="mb-40 text-center">
         <h1 className="text-24 font-semibold">Forgot password</h1>
         <p className="text-16">
           No worries, we'll send you reset instructions.
@@ -154,14 +167,14 @@ const ForgotPassword = () => {
       <Form
         {...getFormProps(form)}
         method="post"
-        className="flex flex-col gap-4"
+        className="inline-block w-full"
       >
         <AuthenticityTokenInput />
         <HoneypotInputs />
 
-        <div>
+        <div className="mb-20">
           <Label htmlFor="email">Email</Label>
-          <Input
+          <Field
             placeholder="name@example.com"
             {...getInputProps(fields.email, {
               type: 'text',
@@ -171,7 +184,10 @@ const ForgotPassword = () => {
         </div>
 
         <ErrorList id={form.errorId} errors={form.errors} />
-        <Button>Recover password</Button>
+
+        <Button className="w-full" type="submit">
+          Recover password
+        </Button>
       </Form>
     </>
   )
