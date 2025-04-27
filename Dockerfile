@@ -15,8 +15,8 @@ COPY . .
 
 # 6. Prisma database setup
 ENV DATABASE_URL="file:./prisma/data.db"
-RUN npx prisma generate
 RUN npx prisma db push
+RUN npx prisma generate
 
 # 7. Build the Remix app
 RUN npm run build
