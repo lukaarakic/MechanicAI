@@ -1,47 +1,43 @@
-######### First Stage: Development/Build #########
+# ---- Stage 1: Base (Dependencies) ----
+  FROM node:slim AS base
 
-FROM node:22.11 AS development
+  RUN apt-get update -y \
+  && apt-get install -y openssl
 
-WORKDIR /app
+  WORKDIR /app
 
-# Kopiramo samo package fajlove i instaliramo dependencije
-COPY --chown=node:node package.json package-lock.json ./
-RUN npm ci
+  COPY package*.json ./
 
-# Kopiramo ceo projekat
-COPY --chown=node:node . .
-
-# Generišemo Prisma klijenta
-RUN npx prisma generate
-
-# Gradimo Remix aplikaciju
-RUN npm run build
-
-# Uklanjamo dev dependencije
-RUN npm prune --omit=dev
-
-######### Second Stage: Production #########
-
-FROM node:22.11 AS production
-
-WORKDIR /app
-
-# Kopiramo samo ono što je potrebno za produkciju
-COPY --chown=node:node --from=development /app/node_modules ./node_modules
-COPY --chown=node:node --from=development /app/build ./build
-COPY --chown=node:node --from=development /app/public ./public
-COPY --chown=node:node --from=development /app/package.json ./package.json
-COPY --chown=node:node --from=development /app/prisma ./prisma
-
-# Setujemo env varijable
-ENV NODE_ENV=production
-ENV DATABASE_URL="file:./prisma/data.db"
-
-# Koristimo non-root usera
-USER node
-
-# Expose-ujemo port
-EXPOSE 3000
-
-# Startujemo Remix server
-CMD ["npm", "run", "start"]
+  COPY . .
+  
+  RUN npm ci
+  
+  # ---- Stage 2: Builder ----
+  FROM node:slim AS builder
+  WORKDIR /app
+  
+  COPY --from=base /app/node_modules ./node_modules
+  COPY . .
+  
+  ENV DATABASE_URL="file:./prisma/data.db"
+  RUN npx prisma db push
+  RUN npx prisma generate
+  RUN npm run build
+  
+  # ---- Stage 3: Production ----
+  FROM node:slim AS production
+  WORKDIR /app
+  
+  COPY --from=builder /app/build ./build
+  COPY --from=builder /app/public ./public
+  COPY --from=builder /app/node_modules ./node_modules
+  COPY --from=builder /app/package.json ./package.json
+  COPY --from=builder /app/prisma ./prisma
+  
+  ENV NODE_ENV=production
+  ENV DATABASE_URL="file:./prisma/data.db"
+  
+  EXPOSE 3000
+  
+  CMD ['sh', '-c', 'npm run db:deploy && npm run start']
+  

@@ -10,6 +10,8 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL: file:./prisma/data.db
+    env_file:
+      - .env
     volumes:
       - ./prisma:/app/prisma
     networks:
