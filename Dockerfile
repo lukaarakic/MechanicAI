@@ -32,5 +32,5 @@
   
   EXPOSE 3000
   
-  CMD ["sh"]
+  CMD ["npm", "run", "start"]
   
