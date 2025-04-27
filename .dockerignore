@@ -1,9 +1,0 @@
-.dockerignore
-node_modules
-Dockerfile
-.dockerignore
-.git
-.gitignore
-README.md
-*.log
-prisma/data.db
