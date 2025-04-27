@@ -151,7 +151,7 @@ const Login = () => {
   return (
     <>
       <AuthHeader
-        title="Login"
+        title="Test"
         subtitle="Use your email to login into your account"
       />
       {/* <Button variant="outline" className="mb-30 w-full">
