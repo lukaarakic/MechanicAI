@@ -1,39 +1,47 @@
-# ---- Stage 1: Base (Dependencies) ----
-  FROM node:22 AS base
-  WORKDIR /app
-  
-  COPY package*.json ./
-  RUN npm i \
-  && npx prisma generate \
-  && npm run build \
-  && npm prune --omit=dev
-  
-  # # ---- Stage 2: Builder ----
-  # FROM node:20 AS builder
-  # WORKDIR /app
-  
-  # COPY --from=base /app/node_modules ./node_modules
-  # COPY . .
-  
-  # ENV DATABASE_URL="file:./prisma/data.db"
-  # RUN npx prisma db push
-  # RUN npx prisma generate
-  # RUN npm run build
-  
-  # ---- Stage 3: Production ----
-  FROM node:22 AS production
-  WORKDIR /app
-  
-  COPY --from=base /app/build ./build
-  COPY --from=base /app/public ./public
-  COPY --from=base /app/node_modules ./node_modules
-  COPY --from=base /app/package.json ./package.json
-  COPY --from=base /app/prisma ./prisma
-  
-  # ENV NODE_ENV=production
-  # ENV DATABASE_URL="file:./prisma/data.db"
-  
-  EXPOSE 3000
-  
-  CMD ["npm", "run", "start"]
-  
+######### First Stage: Development/Build #########
+
+FROM node:20-alpine AS development
+
+WORKDIR /app
+
+# Kopiramo samo package fajlove i instaliramo dependencije
+COPY --chown=node:node package.json package-lock.json ./
+RUN npm ci
+
+# Kopiramo ceo projekat
+COPY --chown=node:node . .
+
+# Generišemo Prisma klijenta
+RUN npx prisma generate
+
+# Gradimo Remix aplikaciju
+RUN npm run build
+
+# Uklanjamo dev dependencije
+RUN npm prune --omit=dev
+
+######### Second Stage: Production #########
+
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Kopiramo samo ono što je potrebno za produkciju
+COPY --chown=node:node --from=development /app/node_modules ./node_modules
+COPY --chown=node:node --from=development /app/build ./build
+COPY --chown=node:node --from=development /app/public ./public
+COPY --chown=node:node --from=development /app/package.json ./package.json
+COPY --chown=node:node --from=development /app/prisma ./prisma
+
+# Setujemo env varijable
+ENV NODE_ENV=production
+ENV DATABASE_URL="file:./prisma/data.db"
+
+# Koristimo non-root usera
+USER node
+
+# Expose-ujemo port
+EXPOSE 3000
+
+# Startujemo Remix server
+CMD ["npm", "run", "start"]
