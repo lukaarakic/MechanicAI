@@ -53,7 +53,7 @@ const Dropdown: FC<DropdownProps> = ({
       />
       <div
         className={cn(
-          'scrollbar absolute z-50 max-h-[30dvh] w-full rounded-7 border border-white/10 bg-black shadow-small transition-all duration-200 ease-in-out',
+          'scrollbar absolute z-50 max-h-[30dvh] w-full rounded-7 border border-white/15 bg-black shadow-small transition-all duration-200 ease-in-out',
           isFocus
             ? 'pointer-events-auto visible opacity-100'
             : 'pointer-events-none invisible opacity-0',

@@ -107,7 +107,7 @@ const Car = () => {
         {cars.map((car) => (
           <div
             key={car.id}
-            className="flex flex-col gap-10 rounded-7 border border-white/10 px-20 py-10 md:max-w-xs"
+            className="flex flex-col gap-10 rounded-7 border border-white/15 px-20 py-10 md:max-w-xs"
           >
             <div className="flex items-center justify-between">
               <h2 className="mb-auto">

@@ -131,7 +131,7 @@ const Solution = () => {
               </AccordionItem>
             </Accordion>
 
-            <div className="grid w-full grid-cols-2 gap-y-5 rounded-7 border border-white/10 p-20">
+            <div className="grid w-full grid-cols-2 gap-y-5 rounded-7 border border-white/15 p-20">
               {solution.car !== null ? (
                 <>
                   <p className="text-16">

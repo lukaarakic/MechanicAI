@@ -42,7 +42,7 @@ const Layout = () => {
               <NavLink
                 to="/settings/account"
                 className={({ isActive }) =>
-                  `rounded-7 border border-white/10 px-50 py-10 text-center ${
+                  `rounded-7 border border-white/15 px-50 py-10 text-center ${
                     isActive ? 'text-blue-700' : 'text-white'
                   }`
                 }
@@ -53,7 +53,7 @@ const Layout = () => {
               <NavLink
                 to="/settings/car"
                 className={({ isActive }) =>
-                  `rounded-7 border border-white/10 px-50 py-10 text-center ${
+                  `rounded-7 border border-white/15 px-50 py-10 text-center ${
                     isActive ? 'text-blue-700' : 'text-white'
                   }`
                 }
@@ -64,7 +64,7 @@ const Layout = () => {
               <NavLink
                 to="/settings/tokens"
                 className={({ isActive }) =>
-                  `col-span-full rounded-7 border border-white/10 px-50 py-10 text-center ${
+                  `col-span-full rounded-7 border border-white/15 px-50 py-10 text-center ${
                     isActive ? 'text-blue-700' : 'text-white'
                   }`
                 }

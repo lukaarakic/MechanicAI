@@ -49,7 +49,7 @@ const HistoryCard: FC<HistoryCardProps> = ({
   return (
     <Link
       to={`/solution/${id}`}
-      className="card relative flex w-full flex-col gap-64 rounded-7 border border-white/10 px-20 py-10 transition-colors hover:bg-white/5"
+      className="card relative flex w-full flex-col gap-64 rounded-7 border border-white/15 px-20 py-10 transition-colors hover:bg-white/5"
     >
       <h2 className="mb-auto font-medium">{title}</h2>
 

@@ -40,7 +40,7 @@ const OnboardingModal = () => {
   return (
     <div className="fixed z-50 h-dvh w-full bg-black/70">
       <div className="mx-auto flex h-full w-full items-center justify-center text-white">
-        <div className="h-[70dvh] w-[90vw] overflow-y-scroll rounded-7 border border-white/10 bg-black p-40 md:h-auto md:w-auto md:overflow-hidden">
+        <div className="h-[70dvh] w-[90vw] overflow-y-scroll rounded-7 border border-white/15 bg-black p-40 md:h-auto md:w-auto md:overflow-hidden">
           <h2 className="text-xl font-semibold text-white">
             Just one more step
           </h2>
