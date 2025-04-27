@@ -1,0 +1,3 @@
+dashboard.mechanicai.app {
+    reverse_proxy mechanicai:3000
+}

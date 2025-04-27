@@ -1,15 +1,37 @@
-version: '3.8'
+version: '3.9'
 
 services:
   mechanicai:
     build: .
-    ports:
-      - '3000:3000'
-    restart: always
-    env_file:
-      - .env
+    container_name: mechanicai
+    restart: unless-stopped
+    expose:
+      - '3000'
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:./prisma/data.db
     volumes:
-      - mechanicai-data:/app/prisma
+      - ./prisma:/app/prisma
+    networks:
+      - app-network
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - app-network
+
+networks:
+  app-network:
 
 volumes:
-  mechanicai-data:
+  caddy_data:
+  caddy_config:
