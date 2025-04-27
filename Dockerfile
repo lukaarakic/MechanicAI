@@ -1,5 +1,5 @@
 # ---- Stage 1: Base (Dependencies) ----
-  FROM node:20-alpine AS base
+  FROM node:22 AS base
   WORKDIR /app
   
   COPY package*.json ./
@@ -21,7 +21,7 @@
   # RUN npm run build
   
   # ---- Stage 3: Production ----
-  FROM node:20-alpine AS production
+  FROM node:22 AS production
   WORKDIR /app
   
   COPY --from=base /app/build ./build
