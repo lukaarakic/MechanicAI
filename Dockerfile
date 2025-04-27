@@ -1,43 +1,51 @@
-# ---- Stage 1: Base (Dependencies) ----
-  FROM node:slim AS base
+# -------- Base Stage ----------
+  FROM node:20-alpine AS base
 
-  RUN apt-get update -y \
-  && apt-get install -y openssl
-
-  WORKDIR /app
-
-  COPY package*.json ./
-
-  COPY . .
+  ENV NODE_ENV production
   
-  RUN npm ci
+  RUN apk add --no-cache libc6-compat openssl1.1-compat sqlite g++ python3
   
-  # ---- Stage 2: Builder ----
-  FROM node:slim AS builder
   WORKDIR /app
   
-  COPY --from=base /app/node_modules ./node_modules
-  COPY . .
+  # -------- Deps Stage ----------
+  FROM base AS deps
   
-  ENV DATABASE_URL="file:./prisma/data.db"
-  RUN npx prisma db push
-  RUN npx prisma generate
+  COPY package.json package-lock.json* ./
+  RUN npm ci --omit=dev
+  
+  # -------- Builder Stage ----------
+  FROM base AS builder
+  
+  WORKDIR /app
+  
+  COPY --from=deps /app/node_modules ./node_modules
+  COPY package.json ./
+  COPY prisma ./prisma
+  COPY public ./public
+  COPY src ./src
+  
+  # Prisma generate
+  RUN npx prisma generate --schema=./prisma/schema.prisma
+  
+  # Remix build
   RUN npm run build
   
-  # ---- Stage 3: Production ----
-  FROM node:slim AS production
+  # -------- Runner Stage ----------
+  FROM base AS runner
+  
   WORKDIR /app
   
-  COPY --from=builder /app/build ./build
-  COPY --from=builder /app/public ./public
   COPY --from=builder /app/node_modules ./node_modules
-  COPY --from=builder /app/package.json ./package.json
   COPY --from=builder /app/prisma ./prisma
+  COPY --from=builder /app/public ./public
+  COPY --from=builder /app/build ./build
+  COPY --from=builder /app/package.json ./package.json
   
-  ENV NODE_ENV=production
   ENV DATABASE_URL="file:./prisma/data.db"
+  ENV PORT=3000
+  ENV HOSTNAME=0.0.0.0
   
   EXPOSE 3000
   
-  CMD ['sh', '-c', 'npm run db:deploy && npm run start']
+  CMD ["npm", "run", "start"]
   
