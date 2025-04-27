@@ -1,49 +1,45 @@
-# -------- Base Stage ----------
+# ---------- Base Stage ----------
   FROM node:20-alpine AS base
 
-  ENV NODE_ENV production
-  
-  RUN apk add --no-cache libc6-compat openssl1.1-compat sqlite g++ python3
+  # Install general dependencies
+  RUN apk add --no-cache libc6-compat openssl1.1-compat
   
   WORKDIR /app
   
-  # -------- Deps Stage ----------
+  # ---------- Deps Stage ----------
   FROM base AS deps
   
-  COPY package.json package-lock.json* ./
-  RUN npm ci --omit=dev
+  COPY package.json package-lock.json ./
+  RUN npm ci
   
-  # -------- Builder Stage ----------
+  # ---------- Builder Stage ----------
   FROM base AS builder
   
   WORKDIR /app
   
   COPY --from=deps /app/node_modules ./node_modules
-  COPY package.json ./
-  COPY prisma ./prisma
-  COPY public ./public
-  COPY src ./src
+  COPY --from=deps /app/package-lock.json ./package-lock.json
   
-  # Prisma generate
-  RUN npx prisma generate --schema=./prisma/schema.prisma
+  COPY . .
   
-  # Remix build
+  ENV DATABASE_URL="file:./prisma/data.db"
+  RUN npx prisma generate
+  
   RUN npm run build
   
-  # -------- Runner Stage ----------
-  FROM base AS runner
+  # ---------- Production Stage ----------
+  FROM base AS production
   
   WORKDIR /app
   
-  COPY --from=builder /app/node_modules ./node_modules
-  COPY --from=builder /app/prisma ./prisma
-  COPY --from=builder /app/public ./public
-  COPY --from=builder /app/build ./build
-  COPY --from=builder /app/package.json ./package.json
-  
+  ENV NODE_ENV=production
   ENV DATABASE_URL="file:./prisma/data.db"
-  ENV PORT=3000
-  ENV HOSTNAME=0.0.0.0
+  
+  COPY --from=builder /app/build ./build
+  COPY --from=builder /app/public ./public
+  COPY --from=builder /app/prisma ./prisma
+  COPY --from=builder /app/package.json ./package.json
+  COPY --from=builder /app/node_modules ./node_modules
   
   EXPOSE 3000
   
