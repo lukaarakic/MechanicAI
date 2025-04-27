@@ -40,7 +40,6 @@ import Field from '~/components/ui/field'
 import ErrorList from '~/components/ui/ErrorList'
 import { GeneralErrorBoundary } from '~/components/error-boundary'
 import AuthHeader from '~/components/AuthHeader'
-import { c } from 'node_modules/vite/dist/node/types.d-aGj9QkWt'
 
 // Assets
 // import GoogleLogo from '~/assets/icons/google-logo.png'
@@ -58,84 +57,80 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  try {
-    await requireAnonymous(request)
+  await requireAnonymous(request)
 
-    const formData = await request.formData()
+  const formData = await request.formData()
 
-    checkHoneypot(formData)
-    await checkCSRF(formData, request)
+  checkHoneypot(formData)
+  await checkCSRF(formData, request)
 
-    const submission = await parseWithZod(formData, {
-      schema: (intent) =>
-        LoginSchema.transform(async (data, ctx) => {
-          if (intent !== null) return { ...data, user: null }
+  const submission = await parseWithZod(formData, {
+    schema: (intent) =>
+      LoginSchema.transform(async (data, ctx) => {
+        if (intent !== null) return { ...data, user: null }
 
-          const userWithPassword = await prisma.user.findUnique({
-            select: {
-              id: true,
-              password: {
-                select: {
-                  hash: true,
-                },
+        const userWithPassword = await prisma.user.findUnique({
+          select: {
+            id: true,
+            password: {
+              select: {
+                hash: true,
               },
             },
-            where: { email: data.email },
+          },
+          where: { email: data.email },
+        })
+        if (!userWithPassword || !userWithPassword.password) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Invalid username or password',
           })
-          if (!userWithPassword || !userWithPassword.password) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: 'Invalid username or password',
-            })
-            return z.NEVER
-          }
+          return z.NEVER
+        }
 
-          const isValid = await bcrypt.compare(
-            data.password,
-            userWithPassword.password.hash,
-          )
+        const isValid = await bcrypt.compare(
+          data.password,
+          userWithPassword.password.hash,
+        )
 
-          if (!isValid) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: 'Invalid username or password',
-            })
+        if (!isValid) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Invalid username or password',
+          })
 
-            return z.NEVER
-          }
+          return z.NEVER
+        }
 
-          return { ...data, user: { id: userWithPassword.id } }
+        return { ...data, user: { id: userWithPassword.id } }
+      }),
+    async: true,
+  })
+
+  if (submission.status !== 'success' || !submission.value.user) {
+    return json(
+      {
+        result: submission.reply({
+          hideFields: ['password'],
         }),
-      async: true,
-    })
-
-    if (submission.status !== 'success' || !submission.value.user) {
-      return json(
-        {
-          result: submission.reply({
-            hideFields: ['password'],
-          }),
-        },
-        {
-          status: submission.status === 'error' ? 400 : 200,
-        },
-      )
-    }
-
-    const { user, redirectTo } = submission.value
-    const cookieSession = await sessionStorage.getSession(
-      request.headers.get('cookie'),
-    )
-    cookieSession.set('userId', user.id)
-
-    return redirect(safeRedirect(redirectTo), {
-      headers: {
-        'set-cookie': await sessionStorage.commitSession(cookieSession),
       },
-    })
-  } catch (error) {
-    console.log('ACTION', error)
+      {
+        status: submission.status === 'error' ? 400 : 200,
+      },
+    )
   }
+
+  const { user, redirectTo } = submission.value
+  const cookieSession = await sessionStorage.getSession(
+    request.headers.get('cookie'),
+  )
+  cookieSession.set('userId', user.id)
+
+  return redirect(safeRedirect(redirectTo), {
+    headers: {
+      'set-cookie': await sessionStorage.commitSession(cookieSession),
+    },
+  })
 }
 
 const Login = () => {
