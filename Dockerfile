@@ -1,12 +1,12 @@
 # ---- Stage 1: Base (Dependencies) ----
-  FROM node:20-alpine AS base
+  FROM node:20 AS base
   WORKDIR /app
   
   COPY package*.json ./
   RUN npm i
   
   # ---- Stage 2: Builder ----
-  FROM node:20-alpine AS builder
+  FROM node:20 AS builder
   WORKDIR /app
   
   COPY --from=base /app/node_modules ./node_modules
@@ -17,7 +17,7 @@
   RUN npm run build
   
   # ---- Stage 3: Production ----
-  FROM node:20-alpine AS production
+  FROM node:20 AS production
   WORKDIR /app
   
   COPY --from=builder /app/build ./build
