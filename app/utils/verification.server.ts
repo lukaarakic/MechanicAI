@@ -7,8 +7,8 @@ export const verifySessionStorage = createCookieSessionStorage({
     path: '/',
     httpOnly: true,
     secure: false,
-    // secure: process.env.NODE_ENV === 'production',
-    secrets: process.env.VITE_SESSION_SECRET?.split(','),
+    // secure: import.meta.env.NODE_ENV === 'production',
+    secrets: import.meta.env.VITE_SESSION_SECRET?.split(','),
     maxAge: 60 * 10,
   },
 })

@@ -5,9 +5,9 @@ const cookie = createCookie('csrf', {
   httpOnly: true,
   path: '/',
   secure: false,
-  // secure: process.env.NODE_ENV === 'production',
+  // secure: import.meta.env.NODE_ENV === 'production',
   sameSite: 'lax',
-  secrets: process.env.VITE_SESSION_SECRET?.split(','),
+  secrets: import.meta.env.VITE_SESSION_SECRET?.split(','),
 })
 
 export const csrf = new CSRF({ cookie })

@@ -6,8 +6,8 @@ export const carStorage = createCookieSessionStorage({
     sameSite: 'lax',
     path: '/',
     httpOnly: true,
-    secrets: process.env.VITE_SESSION_SECRET?.split(','),
-    // secure: process.env.NODE_ENV === 'production',
+    secrets: import.meta.env.VITE_SESSION_SECRET?.split(','),
+    // secure: import.meta.env.NODE_ENV === 'production',
     secure: false,
   },
 })
