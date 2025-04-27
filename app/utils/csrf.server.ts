@@ -4,7 +4,8 @@ import { CSRF, CSRFError } from 'remix-utils/csrf/server'
 const cookie = createCookie('csrf', {
   httpOnly: true,
   path: '/',
-  secure: process.env.NODE_ENV === 'production',
+  secure: false,
+  // secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax',
   secrets: process.env.VITE_SESSION_SECRET?.split(','),
 })
