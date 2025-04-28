@@ -61,7 +61,7 @@ const Solution = () => {
   const { toast } = useToast()
 
   return (
-    <div className="mx-auto mt-50 flex flex-col px-20 pb-120 lg:px-70">
+    <div className="mx-auto mt-50 flex max-w-screen-2xl flex-col px-20 pb-120 lg:px-70">
       <div className="sticky top-10 mb-20 flex items-center gap-10 lg:top-20">
         <Link
           to="/"
@@ -99,16 +99,16 @@ const Solution = () => {
         </Button>
       </div>
 
-      <div className="flex w-full flex-col justify-center gap-30">
+      <div className="flex flex-col justify-center gap-30 xl:flex-row">
         <div className="flex h-60 w-60 items-center justify-center rounded-full bg-light-gray p-10">
           <LogoWhite className="w-ful h-full" />
         </div>
 
-        <Markdown className="markdown max-w-4xl grow-0">
+        <Markdown className="markdown w-full grow-0">
           {solution.solution}
         </Markdown>
 
-        <div className="relative lg:w-[31.25rem]">
+        <div className="relative xl:w-[31.25rem]">
           <div className="sticky top-20 w-full">
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1">
