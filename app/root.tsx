@@ -44,7 +44,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
           email: true,
           firstName: true,
           lastName: true,
-          tokens: true,
           avatar: true,
         },
         where: {

@@ -27,12 +27,7 @@ const Layout = () => {
 
   return (
     <div className="flex min-h-[calc(100dvh-5rem)] gap-10 pb-100 md:min-h-dvh md:pb-0">
-      <Navbar
-        email={user.email}
-        firstName={user.firstName}
-        lastName={user.lastName}
-        avatar={user.avatar}
-      />
+      <Navbar user={user} />
 
       {cars.length === 0 && <OnboardingModal />}
 

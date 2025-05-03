@@ -8,15 +8,25 @@ import HistoryIcon from '~/assets/icons/history-icon.svg?react'
 import SettingsIcon from '~/assets/icons/settings-icon.svg?react'
 import { Form, Link, NavLink } from '@remix-run/react'
 import Button from '~/components/ui/button'
+import { cn } from '~/lib/utils'
 
 interface NavbarProps {
-  firstName: string
-  lastName: string
-  email: string
-  avatar: string
+  user: {
+    email: string
+    firstName: string
+    lastName: string
+    avatar: string
+    id: string
+    car: {
+      id: string
+    }[]
+    subscription: {
+      status: string
+    } | null
+  }
 }
 
-const Navbar: FC<NavbarProps> = ({ email, firstName, lastName, avatar }) => {
+const Navbar: FC<NavbarProps> = ({ user }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
   return (
@@ -72,12 +82,21 @@ const Navbar: FC<NavbarProps> = ({ email, firstName, lastName, avatar }) => {
         content={
           <div className="mr-5 min-w-64 rounded-7 border border-white/25 bg-light-gray p-15 md:mb-25 md:ml-10">
             <p className="text-16 font-semibold">
-              {firstName} {lastName}
+              {user.firstName} {user.lastName}
             </p>
-            <p className="mb-5 text-14 opacity-25">{email}</p>
+            <p className="mb-5 text-14 opacity-25">{user.email}</p>
 
             <p className="mb-20 font-bold">
-              Tokens: <span className="text-green">10</span>
+              Subscription:{' '}
+              <span
+                className={cn(
+                  user.subscription?.status === 'ACTIVE'
+                    ? 'text-green'
+                    : 'text-red-500',
+                )}
+              >
+                {user.subscription?.status}
+              </span>
             </p>
 
             <div className="flex items-center gap-10">
@@ -100,7 +119,7 @@ const Navbar: FC<NavbarProps> = ({ email, firstName, lastName, avatar }) => {
           aria-label="Toggle Popover"
         >
           <img
-            src={avatar}
+            src={user.avatar}
             alt="User Avatar"
             className="h-full w-full rounded-full object-cover"
           />

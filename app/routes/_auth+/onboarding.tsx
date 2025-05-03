@@ -97,7 +97,6 @@ export async function action({ request }: ActionFunctionArgs) {
             },
           },
           avatar: `https://api.dicebear.com/9.x/thumbs/svg?seed=${firstName}`,
-          tokens: 10,
         },
       })
 

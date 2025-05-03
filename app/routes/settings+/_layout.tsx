@@ -24,12 +24,7 @@ const Layout = () => {
   return (
     <>
       <div className="flex min-h-[calc(100dvh-5rem)] gap-10 pb-100 md:min-h-dvh md:pb-0">
-        <Navbar
-          firstName={user.firstName}
-          lastName={user.lastName}
-          email={user.email}
-          avatar={user.avatar}
-        />
+        <Navbar user={user} />
 
         <main className="h-full w-full p-20 pt-50 md:ml-80 md:pl-[8.125rem] md:pr-70">
           <GradientHeading size="sm" className="!mx-0 mb-5">
@@ -62,14 +57,14 @@ const Layout = () => {
               </NavLink>
 
               <NavLink
-                to="/settings/tokens"
+                to="/settings/subscription"
                 className={({ isActive }) =>
                   `col-span-full rounded-7 border border-white/15 px-50 py-10 text-center ${
                     isActive ? 'text-blue-700' : 'text-white'
                   }`
                 }
               >
-                Tokens
+                Subscription
               </NavLink>
             </div>
 

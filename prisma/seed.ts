@@ -23,6 +23,12 @@ async function seed() {
     await prisma.user.create({
       data: {
         ...userData,
+        subscription: {
+          create: {
+            status: 'UNPAID',
+            nextBillDate: new Date(Date.now()),
+          },
+        },
         password: {
           create: createPassword(userData.email),
         },

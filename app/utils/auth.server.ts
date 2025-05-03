@@ -8,7 +8,7 @@ export const userIdKey = 'userId'
 
 export async function getUserId(request: Request) {
   const cookieSession = await sessionStorage.getSession(
-    request.headers.get('cookie')
+    request.headers.get('cookie'),
   )
 
   const userId = cookieSession.get(userIdKey)
@@ -34,7 +34,7 @@ export async function requireAnonymous(request: Request) {
 
 export async function requireUserId(
   request: Request,
-  { redirectTo }: { redirectTo?: string | null } = {}
+  { redirectTo }: { redirectTo?: string | null } = {},
 ) {
   const userId = await getUserId(request)
 
@@ -44,7 +44,7 @@ export async function requireUserId(
     redirectTo =
       redirectTo === null
         ? null
-        : redirectTo ?? `${requestUrl.pathname}${requestUrl.searchParams}`
+        : (redirectTo ?? `${requestUrl.pathname}${requestUrl.searchParams}`)
 
     const loginParams = redirectTo ? new URLSearchParams({ redirectTo }) : null
     const loginRedirect = ['/login', loginParams?.toString()]
@@ -66,7 +66,11 @@ export async function requireUser(request: Request) {
       firstName: true,
       lastName: true,
       avatar: true,
-      tokens: true,
+      subscription: {
+        select: {
+          status: true,
+        },
+      },
       email: true,
       car: {
         select: {
@@ -131,8 +135,13 @@ export async function signup({
       email: email.toLowerCase(),
       firstName,
       lastName,
-      tokens: 10,
       avatar: `https://api.dicebear.com/9.x/thumbs/svg?seed=${firstName}`,
+      subscription: {
+        create: {
+          status: 'UNPAID',
+          nextBillDate: new Date(Date.now()),
+        },
+      },
       password: {
         create: {
           hash: hashedPassword,
@@ -146,7 +155,7 @@ export async function signup({
 
 export async function logout(request: Request) {
   const cookieSession = await sessionStorage.getSession(
-    request.headers.get('cookie')
+    request.headers.get('cookie'),
   )
   cookieSession.unset(userIdKey)
 
@@ -164,7 +173,7 @@ export async function getPasswordHash(password: string) {
 
 export async function verifyUserPassword(
   where: Pick<User, 'email'> | Pick<User, 'id'>,
-  password: Password['hash']
+  password: Password['hash'],
 ) {
   const userWithPassword = await prisma.user.findUnique({
     where,

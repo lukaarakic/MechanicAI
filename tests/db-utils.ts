@@ -11,12 +11,12 @@ export function createUser() {
   const email = uniqueEmailEnforce.enforce(() => {
     return `${firstName.toLowerCase()}${lastName.toLowerCase()}@mail.com`
   })
+
   return {
     firstName,
     lastName,
     avatar,
     email,
-    tokens: faker.number.int({ min: 10, max: 100 }),
   }
 }
 

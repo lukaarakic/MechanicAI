@@ -46,7 +46,7 @@ export async function action({ request }: ActionFunctionArgs) {
       ProblemSchema.transform(async (data, ctx) => {
         if (intent !== null) return { ...data }
 
-        if (user.tokens < 10) {
+        if (user.subscription?.status === 'ACTIVE') {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: 'You dont have enough tokens.',
@@ -233,17 +233,6 @@ export async function action({ request }: ActionFunctionArgs) {
       id: true,
     },
   })
-
-  // await prisma.user.update({
-  //   where: {
-  //     id: user.id,
-  //   },
-  //   data: {
-  //     tokens: {
-  //       decrement: 10,
-  //     },
-  //   },
-  // })
 
   return redirect(`/solution/${solution.id}`)
 }
