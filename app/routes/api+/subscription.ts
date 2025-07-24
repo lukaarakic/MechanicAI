@@ -14,7 +14,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   // const status = params.get('status')
   // const nextBillDate = params.get('next_bill_date')
 
-  console.log('🔔 Paddle Webhook:', alertName)
+  // console.log('🔔 Paddle Webhook:', alertName)
+  console.log('🔔 Paddle Webhook:', rawBody)
 
   // TODO: Lookup subscription by ID and update status/nextBillDate
   // For example:

@@ -19,11 +19,15 @@ export async function action({ request }: ActionFunctionArgs) {
     },
     data: {
       subscription: {
-        update: {
+        upsert: {
           where: {
             userId: `${userId}`,
           },
-          data: {
+          create: {
+            status: 'ACTIVE',
+            nextBillDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          },
+          update: {
             status: 'ACTIVE',
             nextBillDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           },

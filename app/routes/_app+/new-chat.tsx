@@ -46,10 +46,10 @@ export async function action({ request }: ActionFunctionArgs) {
       ProblemSchema.transform(async (data, ctx) => {
         if (intent !== null) return { ...data }
 
-        if (user.subscription?.status === 'ACTIVE') {
+        if (user.subscription?.status !== 'ACTIVE') {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'You dont have enough tokens.',
+            message: 'To continue, please subscribe to unlock full access.',
           })
 
           return z.NEVER

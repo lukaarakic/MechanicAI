@@ -1,35 +1,18 @@
-import chalk from 'chalk'
 import { singleton } from './singleton.server'
+import { PrismaLibSQL } from '@prisma/adapter-libsql'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = singleton('prisma', () => {
-  const logThreshold = 10
+  const config = {
+    url: 'libsql://mechanicai-lukaarakic.aws-us-east-2.turso.io',
+    authToken:
+      'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NTMyOTI5ODYsImlkIjoiNTUwOTg4OGQtYWI1Yy00NzE1LWFkY2QtMjlhYzJlZGM5NjIzIiwicmlkIjoiZWNlMTQ0ODMtNmIzZC00YTk4LThhNzktY2Q1MGM4MjMzZjRkIn0.AXjrdzxD0U6Qg4AFHmFJ6ITIs_1M07LTYsyxNFOCQZy2dRIHKl-2qTJtZdGQLkG9KU1G43nBShHdIvjlFsc6DQ',
+  }
 
-  const client = new PrismaClient({
-    log: [
-      { level: 'query', emit: 'event' },
-      { level: 'error', emit: 'stdout' },
-      { level: 'info', emit: 'stdout' },
-      { level: 'warn', emit: 'stdout' },
-    ],
-  })
-  client.$on('query', async (e) => {
-    if (e.duration < logThreshold) return
-    const color =
-      e.duration < logThreshold * 1.1
-        ? 'green'
-        : e.duration < logThreshold * 1.2
-        ? 'blue'
-        : e.duration < logThreshold * 1.3
-        ? 'yellow'
-        : e.duration < logThreshold * 1.4
-        ? 'redBright'
-        : 'red'
-    const dur = chalk[color](`${e.duration}ms`)
-    console.info(`prisma:query - ${dur} - ${e.query}`)
-  })
-  client.$connect()
-  return client
+  const adapter = new PrismaLibSQL(config)
+  const prisma = new PrismaClient({ adapter })
+
+  return prisma
 })
 
 export { prisma }

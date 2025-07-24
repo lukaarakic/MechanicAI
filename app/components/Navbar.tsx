@@ -95,7 +95,7 @@ const Navbar: FC<NavbarProps> = ({ user }) => {
                     : 'text-red-500',
                 )}
               >
-                {user.subscription?.status}
+                {user.subscription?.status === 'ACTIVE' ? 'Active' : 'Inactive'}
               </span>
             </p>
 
