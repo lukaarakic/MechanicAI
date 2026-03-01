@@ -1,9 +1,20 @@
+## 🚧 Status: Architectural Refactor (V2 Migration)
+
+I am currently migrating the **MechanicAI** ecosystem from **Remix.js** to **Next.js 16 (App Router)**. 
+
+**Why this migration?**
+* **Performance:** Utilizing Next.js Server Actions and Partial Prerendering (PPR) for sub-second AI response times.
+* **Modern Standards:** Transitioning to the latest industry-standard stack used by high-growth US startups.
+
+*Note: The current repository contains the stable Remix-based logic for the core AI and Payment modules.*
+
+
+
 # 🛠️ MechanicAI
 ### *AI-Driven Vehicle Diagnostics & Repair SaaS*
 
 **MechanicAI** is a full-stack SaaS platform designed to bridge the gap between complex vehicle telemetrics and actionable repair advice. By leveraging large language models (LLMs) and secure payment processing, it provides car owners with professional-grade diagnostics at a fraction of the cost.
 
----
 
 ## 🚀 Technical Highlights
 
@@ -15,7 +26,6 @@
     * **Data Safety:** Secure password hashing and role-based access control (RBAC).
 * **Modern Data Layer:** Type-safe database interactions using **Prisma ORM** with a PostgreSQL backend.
 
----
 
 ## 🛠️ Tech Stack
 
@@ -25,20 +35,6 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
 
----
-
-## 🚧 Status: Architectural Refactor (V2 Migration)
-
-I am currently migrating the **MechanicAI** ecosystem from **Remix.js** to **Next.js 15 (App Router)**. 
-
-**Why this migration?**
-* **Performance:** Utilizing Next.js Server Actions and Partial Prerendering (PPR) for sub-second AI response times.
-* **Scalability:** Moving to **Supabase** for enhanced real-time capabilities and edge-ready database management.
-* **Modern Standards:** Transitioning to the latest industry-standard stack used by high-growth US startups.
-
-*Note: The current repository contains the stable Remix-based logic for the core AI and Payment modules.*
-
----
 
 ## 📦 Local Setup
 
@@ -57,10 +53,10 @@ I am currently migrating the **MechanicAI** ecosystem from **Remix.js** to **Nex
 
 3.  **Environment Variables:**
     Create a `.env` file and include:
-    * `DATABASE_URL` (Postgres)
-    * `OPENAI_API_KEY`
-    * `PADDLE_VENDOR_ID` / `PADDLE_PUBLIC_KEY`
-    * `SESSION_SECRET`
+    * `VITE_OPENAI_API_KEY`
+    * `VITE_RESEND_API_KEY`
+    * `VITE_SESSION_SECRET`
+    * `VITE_HONEYPOT_SECRET`
 
 4.  **Run Migrations:**
     ```bash
@@ -71,3 +67,4 @@ I am currently migrating the **MechanicAI** ecosystem from **Remix.js** to **Nex
     ```bash
     npm run dev
     ```
+
